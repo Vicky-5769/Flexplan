@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}Diet Plans – FlexPlan{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-icon" style="background:rgba(34,197,94,0.15)">🥗</div>
+  <h1>Diet Plans</h1>
+  <p>South Indian science-backed nutrition plans tailored to your fitness goal — from fat loss to muscle building.</p>
+</div>
+
+<section class="workouts-section">
+  <div class="workouts-inner">
+
+    <div class="diet-filters">
+      <span style="color:var(--gray);font-size:0.85rem;font-weight:600">🔽 Filter by Goal:</span>
+      <button class="diet-filter-btn active" data-goal="all">All</button>
+      <button class="diet-filter-btn" data-goal="muscle">Muscle Gain</button>
+      <button class="diet-filter-btn" data-goal="weightloss">Weight Loss</button>
+      <button class="diet-filter-btn" data-goal="weightgain">Weight Gain</button>
+      <span class="diet-count" id="diet-count" style="margin-left:auto">3 plans available</span>
+    </div>
+
+    <div class="diet-grid" id="diet-grid"></div>
+  </div>
+</section>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 id="modal-title"></h2>
+    <div class="modal-meta" id="modal-meta"></div>
+    <div class="diet-table-wrapper">
+      <table class="diet-table" id="modal-table"></table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+const DIET_PLANS = [
+  {
+    id: 'muscle',
+    goal: 'muscle',
+    name: '🏋️ Muscle Gain Diet Plan',
+    type: 'High Protein',
+    typeColor: '#3b82f6',
+    image: '/static/image/muscimg.png',
+    desc: 'High-calorie, high-protein South Indian diet designed to fuel muscle growth and recovery after intense training.',
+    kcal: '2,800–3,200',
+    goalLabel: 'Muscle Gain',
+    days: [
+      { day: 'Day 1', breakfast: '3 idlis + sambar + boiled eggs', mid: 'Sprouts sundal', lunch: 'Rice + rasam + chicken curry + veg poriyal', preworkout: 'Banana + peanut butter', postworkout: 'Whey shake + paneer cubes', dinner: 'Grilled fish + chapati + spinach curry', bedtime: 'Warm milk + flax seeds' },
+      { day: 'Day 2', breakfast: 'Dosa + chutney + paneer bhurji', mid: 'Roasted groundnuts + fruit', lunch: 'Rice + sambar + mutton curry + beans poriyal', preworkout: 'Sweet potato mash', postworkout: 'Whey shake + boiled eggs', dinner: 'Chicken curry + lemon rice + veg stir fry', bedtime: 'Curd + chia seeds' },
+      { day: 'Day 3', breakfast: 'Upma + curd + boiled eggs', mid: 'Sprouts salad', lunch: 'Rice + dal + prawn curry + veg stir fry', preworkout: 'Banana + oats', postworkout: 'Whey shake + almonds', dinner: 'Grilled chicken + chapati + spinach curry', bedtime: 'Milk + walnuts' },
+      { day: 'Day 4', breakfast: 'Pongal + sambar + boiled eggs', mid: 'Sundal (chana)', lunch: 'Rice + rasam + fish curry + cabbage poriyal', preworkout: 'Banana + peanut butter sandwich', postworkout: 'Paneer cubes + whey shake', dinner: 'Chicken curry + chapati + carrot poriyal', bedtime: 'Buttermilk + pumpkin seeds' },
+      { day: 'Day 5', breakfast: 'Idli + chutney + scrambled eggs', mid: 'Roasted makhana + fruit', lunch: 'Rice + sambar + chicken curry + veg stir fry', preworkout: 'Banana + oats', postworkout: 'Whey shake + boiled eggs', dinner: 'Paneer curry + lemon rice + spinach curry', bedtime: 'Milk + flax seeds' },
+      { day: 'Day 6', breakfast: 'Dosa + chutney + boiled eggs', mid: 'Sprouts sundal', lunch: 'Rice + rasam + mutton curry + veg poriyal', preworkout: 'Sweet potato mash', postworkout: 'Whey shake + paneer cubes', dinner: 'Grilled fish + chapati + beans curry', bedtime: 'Curd + chia seeds' },
+      { day: 'Day 7', breakfast: 'Upma + curd + boiled eggs', mid: 'Roasted groundnuts + fruit', lunch: 'Rice + dal + chicken curry + veg stir fry', preworkout: 'Banana + peanut butter', postworkout: 'Whey shake + almonds', dinner: 'Paneer curry + lemon rice + spinach curry', bedtime: 'Milk + walnuts' }
+    ],
+    columns: ['Day', 'Breakfast', 'Mid-Morning', 'Lunch', 'Pre-Workout', 'Post-Workout', 'Dinner', 'Bedtime']
+  },
+  {
+    id: 'weightloss',
+    goal: 'weightloss',
+    name: '🥦 Weight Loss Diet Plan',
+    type: 'Calorie Deficit',
+    typeColor: '#22c55e',
+    image: '/static/image/weil.png',
+    desc: 'A calorie-deficit South Indian diet rich in protein and fiber to support fat loss while preserving muscle mass.',
+    kcal: '1,400–1,700',
+    goalLabel: 'Weight Loss',
+    days: [
+      { day: 'Day 1', breakfast: '2 idlis + sambar + 1 boiled egg', mid: 'Sprouts sundal', lunch: '1 chapati + dal + veg poriyal + salad', snack: 'Green tea + roasted groundnuts', dinner: 'Grilled fish + sautéed spinach', bedtime: 'Warm milk + flax seeds' },
+      { day: 'Day 2', breakfast: 'Dosa (2 small) + chutney + paneer cubes', mid: 'Fruit bowl', lunch: 'Brown rice + rasam + chicken curry + beans poriyal', snack: 'Buttermilk + roasted chana', dinner: 'Paneer curry + chapati + cabbage stir fry', bedtime: 'Herbal tea' },
+      { day: 'Day 3', breakfast: 'Upma (millet) + curd', mid: 'Sprouts salad', lunch: 'Lemon rice (small) + dal + veg curry', snack: 'Green tea + roasted makhana', dinner: 'Grilled prawns + sautéed broccoli', bedtime: 'Warm milk' },
+      { day: 'Day 4', breakfast: 'Pongal (small) + sambar', mid: '1 boiled egg + fruit', lunch: '1 chapati + dal + fish curry + veg stir fry', snack: 'Buttermilk + sundal', dinner: 'Paneer bhurji + sautéed spinach', bedtime: 'Herbal tea' },
+      { day: 'Day 5', breakfast: '2 idlis + chutney + boiled egg', mid: 'Sprouts sundal', lunch: 'Brown rice + rasam + chicken curry + veg curry', snack: 'Green tea + roasted groundnuts', dinner: 'Grilled paneer + chapati + beans poriyal', bedtime: 'Warm milk' },
+      { day: 'Day 6', breakfast: 'Dosa (2 small) + chutney + curd', mid: 'Fruit bowl', lunch: 'Millet rice + dal + prawn curry + veg stir fry', snack: 'Buttermilk + roasted chana', dinner: 'Grilled fish + sautéed spinach', bedtime: 'Herbal tea' },
+      { day: 'Day 7', breakfast: 'Upma + boiled egg', mid: 'Sprouts salad', lunch: 'Brown rice + sambar + chicken curry + veg curry', snack: 'Green tea + roasted makhana', dinner: 'Paneer curry + chapati + cabbage stir fry', bedtime: 'Warm milk' }
+    ],
+    columns: ['Day', 'Breakfast', 'Mid-Morning', 'Lunch', 'Evening Snack', 'Dinner', 'Bedtime']
+  },
+  {
+    id: 'weightgain',
+    goal: 'weightgain',
+    name: '🍛 Weight Gain Diet Plan',
+    type: 'Calorie Surplus',
+    typeColor: '#f97316',
+    image: '/static/image/weigl.png',
+    desc: 'High-calorie South Indian diet plan designed to increase body weight and fuel intense training sessions.',
+    kcal: '3,000–3,500',
+    goalLabel: 'Weight Gain',
+    days: [
+      { day: 'Day 1', breakfast: '4 idlis + sambar + 2 boiled eggs', mid: 'Banana + peanut butter', lunch: 'Rice + rasam + chicken curry + veg poriyal', preworkout: 'Sweet potato mash', postworkout: 'Whey shake + paneer cubes', dinner: 'Fish curry + chapati + spinach curry', bedtime: 'Warm milk + almonds' },
+      { day: 'Day 2', breakfast: 'Dosa (3 large) + chutney + paneer bhurji', mid: 'Sprouts sundal', lunch: 'Rice + sambar + mutton curry + beans poriyal', preworkout: 'Banana + oats', postworkout: 'Whey shake + boiled eggs', dinner: 'Chicken curry + lemon rice + veg stir fry', bedtime: 'Curd + walnuts' },
+      { day: 'Day 3', breakfast: 'Upma + curd + scrambled eggs', mid: 'Roasted groundnuts + fruit', lunch: 'Rice + dal + prawn curry + veg stir fry', preworkout: 'Peanut butter sandwich', postworkout: 'Whey shake + paneer cubes', dinner: 'Grilled fish + chapati + spinach curry', bedtime: 'Milk + flax seeds' },
+      { day: 'Day 4', breakfast: 'Pongal + sambar + boiled eggs', mid: 'Sprouts salad', lunch: 'Rice + rasam + chicken curry + cabbage poriyal', preworkout: 'Banana + oats', postworkout: 'Whey shake + almonds', dinner: 'Paneer curry + chapati + carrot poriyal', bedtime: 'Buttermilk + cashews' },
+      { day: 'Day 5', breakfast: '3 idlis + chutney + paneer cubes', mid: 'Roasted makhana + fruit', lunch: 'Rice + sambar + mutton curry + veg stir fry', preworkout: 'Banana + peanut butter', postworkout: 'Whey shake + boiled eggs', dinner: 'Grilled prawns + chapati + beans curry', bedtime: 'Warm milk + walnuts' },
+      { day: 'Day 6', breakfast: 'Dosa (3 large) + chutney + scrambled eggs', mid: 'Sprouts sundal', lunch: 'Rice + dal + chicken curry + veg stir fry', preworkout: 'Sweet potato mash', postworkout: 'Whey shake + paneer cubes', dinner: 'Fish curry + chapati + spinach curry', bedtime: 'Curd + chia seeds' },
+      { day: 'Day 7', breakfast: 'Upma + curd + boiled eggs', mid: 'Roasted groundnuts + fruit', lunch: 'Rice + rasam + paneer curry + veg stir fry', preworkout: 'Banana + oats', postworkout: 'Whey shake + almonds', dinner: 'Chicken curry + lemon rice + veg curry', bedtime: 'Warm milk + flax seeds' }
+    ],
+    columns: ['Day', 'Breakfast', 'Mid-Morning', 'Lunch', 'Pre-Workout', 'Post-Workout', 'Dinner', 'Bedtime']
+  }
+];
+
+let currentGoal = 'all';
+
+function renderDiet() {
+  const plans = currentGoal === 'all' ? DIET_PLANS : DIET_PLANS.filter(p => p.goal === currentGoal);
+  document.getElementById('diet-count').textContent = `${plans.length} plan${plans.length !== 1 ? 's' : ''} available`;
+  
+  document.getElementById('diet-grid').innerHTML = plans.map(p => `
+    <div class="diet-card animate-in" onclick="openModal('${p.id}')" style="cursor:pointer">
+      <div class="diet-card-img">
+      <img src="${p.image || ''}" class="diet-img">
+      <span class="diet-type-badge" style="background:${p.typeColor}20;color:${p.typeColor};border:1px solid ${p.typeColor}40">${p.type}</span>
+      </div>
+      <div class="diet-card-body">
+        <h3>${p.name}</h3>
+        <div class="diet-goal-tag">⚡ ${p.goalLabel}</div>
+        <p>${p.desc}</p>
+        <div style="margin-top:0.5rem">
+          <span class="diet-kcal">⚡ ${p.kcal}</span> <span style="color:var(--gray);font-size:0.85rem">kcal/day</span>
+        </div>
+        <div style="margin-top:1rem">
+          <button class="btn-primary" style="font-size:0.85rem;padding:0.55rem 1.25rem" onclick="openModal('${p.id}')">View 7-Day Plan →</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openModal(id) {
+  const plan = DIET_PLANS.find(p => p.id === id);
+  if (!plan) return;
+  
+  document.getElementById('modal-title').textContent = plan.name;
+  document.getElementById('modal-meta').innerHTML = `
+    <span style="background:var(--orange-glow);color:var(--orange);padding:0.3rem 0.8rem;border-radius:6px;font-size:0.8rem;font-weight:600">⚡ ${plan.kcal} kcal/day</span>
+    <span style="background:var(--bg3);color:var(--gray);padding:0.3rem 0.8rem;border-radius:6px;font-size:0.8rem">🎯 ${plan.goalLabel}</span>
+    <span style="background:var(--bg3);color:var(--gray);padding:0.3rem 0.8rem;border-radius:6px;font-size:0.8rem">📅 7 Days</span>
+    <span style="background:var(--bg3);color:var(--gray);padding:0.3rem 0.8rem;border-radius:6px;font-size:0.8rem">🍛 South Indian</span>
+  `;
+
+  const cols = plan.columns;
+  const colKeys = id === 'weightloss'
+    ? ['day', 'breakfast', 'mid', 'lunch', 'snack', 'dinner', 'bedtime']
+    : ['day', 'breakfast', 'mid', 'lunch', 'preworkout', 'postworkout', 'dinner', 'bedtime'];
+
+  const thead = `<thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>`;
+  const tbody = `<tbody>${plan.days.map(row => `<tr>${colKeys.map(k => `<td>${row[k] || '—'}</td>`).join('')}</tr>`).join('')}</tbody>`;
+  document.getElementById('modal-table').innerHTML = thead + tbody;
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+}
+
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+
+document.querySelectorAll('.diet-filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.diet-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentGoal = btn.dataset.goal;
+    renderDiet();
+  });
+});
+
+renderDiet();
+</script>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}FlexPlan – Forge Your Perfect Body & Mind{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="hero-badge">🔥 Your Fitness Journey Starts Here</div>
+      <h1 class="hero-title">Forge Your <span>Perfect</span> Body & Mind</h1>
+      <p class="hero-desc">Personalized workouts, science-backed diet plans, and smart progress tracking — all in one place. Built for every fitness level.</p>
+      <div class="hero-btns">
+        <a href="/workouts" class="btn-primary">🏋️ Explore Workouts</a>
+        <a href="/diet" class="btn-secondary">🥗 View Diet Plans</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num">15+</div>
+          <div class="stat-label">Workouts</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">6</div>
+          <div class="stat-label">Diet Plans</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">Free</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-img-card">
+        <img src="{{ url_for('static', filename='image/image.png') }}" class="hero-img">
+        
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section">
+  <div class="section-inner">
+    <div class="text-center">
+      <span class="section-tag">Everything You Need</span>
+      <h2 class="section-title">Your Complete Fitness Hub</h2>
+      <p class="section-sub">From beginner to advanced — we have the tools to help you reach your goals.</p>
+    </div>
+    <div class="features-grid">
+      <a href="/workouts" class="feature-card">
+        <div class="feature-icon" style="background:rgba(59,130,246,0.15)">🏋️</div>
+        <h3>Workouts</h3>
+        <p>Explore 15+ exercises with instructions, sets, reps and calorie data — dumbbell & bodyweight.</p>
+        <span class="feature-link">Explore →</span>
+      </a>
+      <a href="/diet" class="feature-card">
+        <div class="feature-icon" style="background:rgba(34,197,94,0.15)">🥗</div>
+        <h3>Diet Plans</h3>
+        <p>South Indian science-backed meal plans for weight loss, muscle gain, and weight gain goals.</p>
+        <span class="feature-link">Explore →</span>
+      </a>
+      <a href="/progress" class="feature-card">
+        <div class="feature-icon" style="background:rgba(249,115,22,0.15)">📊</div>
+        <h3>Progress Tracker</h3>
+        <p>Log your workouts, track weight, and visualize your fitness journey over time.</p>
+        <span class="feature-link">Explore →</span>
+      </a>
+      <a href="/bmi" class="feature-card">
+        <div class="feature-icon" style="background:rgba(168,85,247,0.15)">🧮</div>
+        <h3>BMI Calculator</h3>
+        <p>Calculate your Body Mass Index and get personalized health recommendations.</p>
+        <span class="feature-link">Explore →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- TIPS -->
+<section class="section tips-bg">
+  <div class="section-inner">
+    <div class="text-center">
+      <span class="section-tag">Expert Advice</span>
+      <h2 class="section-title">Fitness Tips That Work</h2>
+      <p class="section-sub">Evidence-based tips to maximize your results and stay injury-free.</p>
+    </div>
+    <div class="tips-grid">
+      <div class="tip-card">
+        <div class="tip-cat">🔥 NUTRITION</div>
+        <h4>Stay Hydrated</h4>
+        <p>Drink at least 8–10 glasses of water daily. Proper hydration improves performance, aids recovery, and boosts metabolism.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-cat">🌙 RECOVERY</div>
+        <h4>Sleep 7–9 Hours</h4>
+        <p>Quality sleep is when muscle repair and growth happens. Prioritize 7–9 hours for optimal recovery and hormone balance.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-cat">📈 TRAINING</div>
+        <h4>Progressive Overload</h4>
+        <p>Gradually increase weight, reps, or sets over time. This is the key principle for continuous strength and muscle gains.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-cat">🔥 TRAINING</div>
+        <h4>Warm Up Properly</h4>
+        <p>Always spend 5–10 minutes warming up before intense exercise to prevent injury and improve performance.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-cat">🥩 NUTRITION</div>
+        <h4>Eat Enough Protein</h4>
+        <p>Aim for 0.7–1g of protein per pound of bodyweight to support muscle repair, growth and satiety.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-cat">❤️ RECOVERY</div>
+        <h4>Rest Days Matter</h4>
+        <p>Muscles grow during rest, not during workouts. Schedule 1–2 rest days per week for optimal results.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-cat">📉 MINDSET</div>
+        <h4>Track Your Progress</h4>
+        <p>Keep a workout journal or use an app to track your exercises, sets, reps, and weights. Progress tracking keeps you motivated.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-cat">🎯 MINDSET</div>
+        <h4>Consistency Over Intensity</h4>
+        <p>Showing up consistently every week beats occasional intense sessions. Build sustainable habits for long-term success.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}Progress Tracker – FlexPlan{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-icon" style="background:rgba(249,115,22,0.15)">📊</div>
+  <h1>Progress Tracker</h1>
+  <p>Log your workouts, track your weight, and visualize your fitness journey.</p>
+</div>
+
+<section class="progress-section">
+  <div class="progress-inner">
+
+    <div class="progress-stats">
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">📅</div>
+        <div>
+          <div class="stat-card-val" id="total-workouts">0</div>
+          <div class="stat-card-label">Total Workouts</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:rgba(249,115,22,0.15)">🔥</div>
+        <div>
+          <div class="stat-card-val" id="total-calories">0</div>
+          <div class="stat-card-label">Total Calories Burned</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:rgba(34,197,94,0.15)">👤</div>
+        <div>
+          <div class="stat-card-val" id="avg-bmi">—</div>
+          <div class="stat-card-label">Average BMI</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="log-btn" id="toggle-form-btn" onclick="toggleForm()">+ Log Workout</button>
+
+    <div class="log-form" id="log-form">
+      <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem">Log a New Workout</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" id="inp-name" placeholder="Enter your name">
+        </div>
+        <div class="form-group">
+          <label>Exercise / Workout</label>
+          <select id="inp-workout">
+            <option value="">Select workout...</option>
+            <option>Push-Ups</option>
+            <option>Pull-Ups</option>
+            <option>Squats</option>
+            <option>Dumbbell Bicep Curl</option>
+            <option>Bench Press</option>
+            <option>Deadlift</option>
+            <option>Shoulder Press</option>
+            <option>Lunges</option>
+            <option>Plank</option>
+            <option>Burpees</option>
+            <option>Running</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Weight (kg)</label>
+          <input type="number" id="inp-weight" placeholder="70" min="30" max="300">
+        </div>
+        <div class="form-group">
+          <label>Height (cm)</label>
+          <input type="number" id="inp-height" placeholder="175" min="100" max="250">
+        </div>
+        <div class="form-group">
+          <label>Calories Burned (kcal)</label>
+          <input type="number" id="inp-calories" placeholder="300" min="0">
+        </div>
+      </div>
+      <div style="display:flex;gap:1rem;margin-top:0.5rem">
+        <button class="log-btn" style="margin:0" onclick="submitLog()">💾 Save Workout</button>
+        <button onclick="toggleForm()" style="background:var(--bg3);border:1px solid var(--border);color:var(--light);padding:0.75rem 1.5rem;border-radius:var(--radius);cursor:pointer;font-family:var(--font-body);font-weight:600">Cancel</button>
+      </div>
+      <div id="log-msg" style="margin-top:1rem;font-size:0.88rem;display:none"></div>
+    </div>
+
+    <div class="log-list" id="log-list">
+      <div class="empty-state"><div class="icon">📋</div><p>No workouts logged yet. Start by clicking "Log Workout"!</p></div>
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
+{% block scripts %}
+<script>
+let logs = [];
+
+async function loadLogs() {
+  try {
+    const res = await fetch('/api/progress');
+    if (res.status === 401) {
+      document.getElementById('log-list').innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🔒</div>
+          <p>Please <a href="/login" style="color:var(--orange)">login</a> to track your progress.</p>
+        </div>`;
+      document.getElementById('toggle-form-btn').style.display = 'none';
+      return;
+    }
+    logs = await res.json();
+    renderLogs();
+    updateStats();
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function updateStats() {
+  document.getElementById('total-workouts').textContent = logs.length;
+  const totalCal = logs.reduce((s, l) => s + (l.calories || 0), 0);
+  document.getElementById('total-calories').textContent = totalCal;
+  const bmis = logs.filter(l => l.bmi > 0).map(l => l.bmi);
+  document.getElementById('avg-bmi').textContent = bmis.length ? (bmis.reduce((a, b) => a + b, 0) / bmis.length).toFixed(1) : '—';
+}
+
+function renderLogs() {
+  if (!logs.length) {
+    document.getElementById('log-list').innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>No workouts logged yet. Start by clicking "Log Workout"!</p></div>';
+    return;
+  }
+  document.getElementById('log-list').innerHTML = logs.map(log => `
+    <div class="log-item animate-in">
+      <div class="log-avatar">${(log.username || log.name || 'U')[0].toUpperCase()}</div>
+      <div class="log-info">
+        <div class="name">${log.username || log.name || 'User'}</div>
+        <div class="exercise">${log.workout || 'Workout'}</div>
+      </div>
+      <div class="log-tags">
+        ${log.weight ? `<span class="log-tag">${log.weight} kg</span>` : ''}
+        ${log.bmi ? `<span class="log-tag blue">BMI: ${log.bmi}</span>` : ''}
+        ${log.calories ? `<span class="log-tag orange">${log.calories} kcal</span>` : ''}
+      </div>
+      <div class="log-date">${log.date || ''}</div>
+      <button class="delete-btn" onclick="deleteLog('${log._id}')">🗑</button>
+    </div>
+  `).join('');
+}
+
+function toggleForm() {
+  const form = document.getElementById('log-form');
+  form.classList.toggle('active');
+}
+
+async function submitLog() {
+  const name = document.getElementById('inp-name').value.trim();
+  const workout = document.getElementById('inp-workout').value;
+  const weight = parseFloat(document.getElementById('inp-weight').value);
+  const height = parseFloat(document.getElementById('inp-height').value);
+  const calories = parseInt(document.getElementById('inp-calories').value);
+  const msg = document.getElementById('log-msg');
+
+  if (!workout || !weight || !height) {
+    msg.style.display = 'block';
+    msg.style.color = '#fca5a5';
+    msg.textContent = '⚠️ Please fill in workout, weight and height.';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, workout, weight, height, calories: calories || 0 })
+    });
+    
+    if (res.status === 401) {
+      msg.style.display = 'block';
+      msg.style.color = '#fca5a5';
+      msg.textContent = '⚠️ Please login to save your progress.';
+      return;
+    }
+
+    const entry = await res.json();
+    logs.unshift(entry);
+    renderLogs();
+    updateStats();
+    toggleForm();
+    document.getElementById('inp-name').value = '';
+    document.getElementById('inp-workout').value = '';
+    document.getElementById('inp-weight').value = '';
+    document.getElementById('inp-height').value = '';
+    document.getElementById('inp-calories').value = '';
+    msg.style.display = 'none';
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+async function deleteLog(id) {
+  await fetch(`/api/progress/${id}`, { method: 'DELETE' });
+  logs = logs.filter(l => l._id !== id);
+  renderLogs();
+  updateStats();
+}
+
+loadLogs();
+</script>
+{% endblock %}

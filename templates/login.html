@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Login – FlexPlan{% endblock %}
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+
+<div class="auth-page">
+  <div class="auth-card">
+    <a href="/" class="auth-logo" style="text-decoration:none;display:flex;align-items:center;gap:0.6rem">
+      <div class="auth-logo-icon">🏋️</div>
+      <span class="auth-logo-text">FlexPlan</span>
+    </a>
+    <h2>Welcome Back</h2>
+    <p class="sub">Log in to track your fitness journey.</p>
+    
+    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-success" id="auth-success"></div>
+    
+    <div class="auth-form-group">
+      <label>Email Address</label>
+      <input type="email" id="email" placeholder="you@example.com">
+    </div>
+    <div class="auth-form-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()">
+    </div>
+    <button class="auth-submit" onclick="doLogin()">Login →</button>
+    <div class="auth-link">
+      Don't have an account? <a href="/register">Register here</a>
+    </div>
+    <div style="text-align:center;margin-top:1.25rem">
+      <a href="/" style="color:var(--gray);font-size:0.85rem;text-decoration:none">← Back to Home</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+async function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const errEl = document.getElementById('auth-error');
+  const sucEl = document.getElementById('auth-success');
+  errEl.classList.remove('show');
+  
+  if (!email || !password) { 
+    errEl.textContent = 'Please fill in all fields.'; 
+    errEl.classList.add('show'); 
+    return; 
+  }
+  
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      errEl.textContent = data.error || 'Login failed.';
+      errEl.classList.add('show');
+    } else {
+      sucEl.textContent = `Welcome back, ${data.username}! Redirecting...`;
+      sucEl.classList.add('show');
+      setTimeout(() => window.location.href = '/', 1200);
+    }
+  } catch(e) {
+    errEl.textContent = 'Connection error. Make sure the server is running.';
+    errEl.classList.add('show');
+  }
+}
+</script>
+{% endblock %}

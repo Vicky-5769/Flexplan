@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}BMI Calculator – FlexPlan{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-icon" style="background:rgba(168,85,247,0.15)">🧮</div>
+  <h1>BMI Calculator</h1>
+  <p>Calculate your Body Mass Index and understand what it means for your health.</p>
+</div>
+
+<section class="bmi-section">
+  <div class="bmi-inner">
+
+    <!-- Form -->
+    <div class="bmi-form-card">
+      <h3>Calculate Your BMI</h3>
+      <div class="bmi-unit-toggle">
+        <button class="bmi-unit-btn active" id="btn-metric" onclick="setUnit('metric')">Metric (kg/cm)</button>
+        <button class="bmi-unit-btn" id="btn-imperial" onclick="setUnit('imperial')">Imperial (lbs/ft)</button>
+      </div>
+      <div class="form-group" style="margin-bottom:1.25rem">
+        <label id="weight-label">Weight (kg)</label>
+        <input type="number" id="weight" class="form-group input" placeholder="70" min="1" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--white);padding:0.75rem 1rem;border-radius:8px;font-family:var(--font-body);font-size:0.95rem;outline:none">
+      </div>
+      <div class="form-group" style="margin-bottom:1.5rem">
+        <label id="height-label" style="display:block;font-size:0.85rem;color:var(--gray);margin-bottom:0.4rem;font-weight:600">Height (cm)</label>
+        <input type="number" id="height" placeholder="175" min="1" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--white);padding:0.75rem 1rem;border-radius:8px;font-family:var(--font-body);font-size:0.95rem;outline:none">
+      </div>
+      <div id="height-ft-row" style="display:none;margin-bottom:1.5rem">
+        <label style="display:block;font-size:0.85rem;color:var(--gray);margin-bottom:0.4rem;font-weight:600">Height (inches)</label>
+        <input type="number" id="height-in" placeholder="69" min="1" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--white);padding:0.75rem 1rem;border-radius:8px;font-family:var(--font-body);font-size:0.95rem;outline:none">
+      </div>
+      <button class="btn-primary" style="width:100%;justify-content:center" onclick="calculateBMI()">🧮 Calculate BMI</button>
+    </div>
+
+    <!-- Result -->
+    <div class="bmi-result">
+      <h3>BMI Categories</h3>
+      <div class="bmi-score" id="bmi-score-area" style="display:none">
+        <div class="score" id="bmi-value" style="color:var(--orange)">—</div>
+        <div class="category" id="bmi-category">—</div>
+        <div id="bmi-recommendation" style="color:var(--gray);font-size:0.88rem;margin-top:0.5rem;max-width:280px;margin-left:auto;margin-right:auto"></div>
+      </div>
+      <div class="bmi-categories">
+        <div class="bmi-cat-item">
+          <div class="bmi-dot" style="background:#3b82f6"></div>
+          <span class="bmi-cat-name">Underweight</span>
+          <span class="bmi-cat-range">< 18.5</span>
+        </div>
+        <div class="bmi-cat-item">
+          <div class="bmi-dot" style="background:#22c55e"></div>
+          <span class="bmi-cat-name">Normal</span>
+          <span class="bmi-cat-range">18.5 – 24.9</span>
+        </div>
+        <div class="bmi-cat-item">
+          <div class="bmi-dot" style="background:#f59e0b"></div>
+          <span class="bmi-cat-name">Overweight</span>
+          <span class="bmi-cat-range">25 – 29.9</span>
+        </div>
+        <div class="bmi-cat-item">
+          <div class="bmi-dot" style="background:#ef4444"></div>
+          <span class="bmi-cat-name">Obese</span>
+          <span class="bmi-cat-range">≥ 30</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bmi-disclaimer">
+      ⓘ BMI is a screening tool, not a diagnostic measure. Consult a healthcare professional for a complete health assessment.
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
+{% block scripts %}
+<script>
+let unit = 'metric';
+
+function setUnit(u) {
+  unit = u;
+  document.getElementById('btn-metric').classList.toggle('active', u === 'metric');
+  document.getElementById('btn-imperial').classList.toggle('active', u === 'imperial');
+  document.getElementById('weight-label').textContent = u === 'metric' ? 'Weight (kg)' : 'Weight (lbs)';
+  document.getElementById('height-label').textContent = u === 'metric' ? 'Height (cm)' : 'Height (ft)';
+  document.getElementById('height-in').parentElement.style.display = u === 'imperial' ? 'block' : 'none';
+  document.getElementById('height').placeholder = u === 'metric' ? '175' : '5.9';
+  document.getElementById('weight').placeholder = u === 'metric' ? '70' : '154';
+}
+
+// Label style fix
+document.getElementById('weight-label').style.cssText = 'display:block;font-size:0.85rem;color:var(--gray);margin-bottom:0.4rem;font-weight:600';
+
+function calculateBMI() {
+  let weight = parseFloat(document.getElementById('weight').value);
+  let heightCm;
+  
+  if (unit === 'metric') {
+    heightCm = parseFloat(document.getElementById('height').value);
+  } else {
+    const ft = parseFloat(document.getElementById('height').value) || 0;
+    const inches = parseFloat(document.getElementById('height-in').value) || 0;
+    heightCm = (ft * 30.48) + (inches * 2.54);
+    weight = weight * 0.453592; // lbs to kg
+  }
+  
+  if (!weight || !heightCm) return;
+  
+  const bmi = (weight / Math.pow(heightCm / 100, 2)).toFixed(1);
+  let category, color, rec;
+  
+  if (bmi < 18.5) {
+    category = 'Underweight'; color = '#3b82f6';
+    rec = 'Consider increasing caloric intake and strength training to build healthy body mass.';
+  } else if (bmi < 25) {
+    category = 'Normal Weight ✓'; color = '#22c55e';
+    rec = 'Great! Maintain your current healthy lifestyle with regular exercise and balanced diet.';
+  } else if (bmi < 30) {
+    category = 'Overweight'; color = '#f59e0b';
+    rec = 'Consider a mild calorie deficit, increased cardio, and strength training for best results.';
+  } else {
+    category = 'Obese'; color = '#ef4444';
+    rec = 'Consult a healthcare professional. A structured diet and exercise program is highly recommended.';
+  }
+  
+  const area = document.getElementById('bmi-score-area');
+  area.style.display = 'block';
+  document.getElementById('bmi-value').textContent = bmi;
+  document.getElementById('bmi-value').style.color = color;
+  document.getElementById('bmi-category').textContent = category;
+  document.getElementById('bmi-category').style.color = color;
+  document.getElementById('bmi-recommendation').textContent = rec;
+}
+</script>
+{% endblock %}

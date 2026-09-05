@@ -1,0 +1,810 @@
+{% extends "base.html" %}
+{% block title %}Workout Library – FlexPlan{% endblock %}
+
+{% block head %}
+<style>
+/* ══════════════════════════════════════════════════
+   FLEXPLAN — DAY-GROUPED FLIP CARD WORKOUT PAGE
+   ══════════════════════════════════════════════════ */
+
+/* ── HERO ──────────────────────────────────────── */
+.wo-hero {
+  position: relative;
+  padding: 7.5rem 2rem 4rem;
+  overflow: hidden;
+  text-align: center;
+  background: #0a0c10;
+}
+.wo-hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(249,115,22,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(249,115,22,0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  animation: gridScroll 22s linear infinite;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
+@keyframes gridScroll { 100% { background-position: 56px 56px; } }
+.wo-glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+.wo-glow.g1 { width:500px;height:500px; background:rgba(249,115,22,0.12); top:-150px;left:-120px; animation:gf1 9s ease-in-out infinite; }
+.wo-glow.g2 { width:400px;height:400px; background:rgba(239,68,68,0.08);  bottom:-100px;right:-80px; animation:gf1 11s ease-in-out infinite reverse; }
+@keyframes gf1 { 0%,100%{transform:translate(0,0);} 50%{transform:translate(40px,25px);} }
+.wo-hero-content { position:relative; z-index:2; max-width:700px; margin:0 auto; }
+.wo-eyebrow {
+  display:inline-flex; align-items:center; gap:.5rem;
+  background:rgba(249,115,22,0.1); border:1px solid rgba(249,115,22,0.3);
+  color:var(--orange); font-size:.7rem; font-weight:700;
+  letter-spacing:.15em; text-transform:uppercase;
+  padding:.35rem 1.1rem; border-radius:50px; margin-bottom:1.25rem;
+}
+.wo-hero h1 {
+  font-family:var(--font-head); font-size:clamp(3.5rem,8vw,6rem);
+  line-height:.95; letter-spacing:.02em; color:#fff; margin-bottom:.9rem;
+}
+.wo-hero h1 .ac { color:var(--orange); }
+.wo-hero-sub { color:var(--gray); font-size:1rem; max-width:460px; margin:0 auto 2.2rem; line-height:1.7; }
+.wo-chips { display:inline-flex; gap:.65rem; flex-wrap:wrap; justify-content:center; }
+.wo-chip {
+  background:rgba(30,34,48,.85); border:1px solid var(--border);
+  border-radius:12px; padding:.7rem 1.35rem; text-align:center;
+  backdrop-filter:blur(10px);
+  transition:transform .3s,border-color .3s,box-shadow .3s;
+}
+.wo-chip:hover { transform:translateY(-3px); border-color:var(--orange); box-shadow:0 8px 24px rgba(249,115,22,0.18); }
+.wo-chip .cn { display:block; font-family:var(--font-head); font-size:1.7rem; color:var(--orange); line-height:1; }
+.wo-chip .cl { display:block; font-size:.62rem; text-transform:uppercase; letter-spacing:.1em; color:var(--gray); margin-top:.2rem; }
+
+/* ── CONTROL AREA ─────────────────────────────── */
+.wo-controls { max-width:1320px; margin:0 auto; padding:2.5rem 2rem 0; }
+
+/* Type toggle */
+.type-row { display:flex; gap:.75rem; margin-bottom:1.4rem; }
+.type-btn {
+  display:flex; align-items:center; gap:.6rem;
+  padding:.8rem 1.75rem; border-radius:12px;
+  border:1.5px solid var(--border); background:var(--card);
+  color:var(--gray); font-family:var(--font-body); font-size:.9rem; font-weight:600;
+  cursor:pointer; transition:all .22s ease; position:relative; overflow:hidden;
+}
+.type-btn::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(249,115,22,0.09),transparent); opacity:0; transition:opacity .22s; }
+.type-btn:hover::before { opacity:1; }
+.type-btn:hover { border-color:rgba(249,115,22,0.4); color:var(--light); }
+.type-btn.active { border-color:var(--orange); color:#fff; box-shadow:0 4px 18px rgba(249,115,22,0.22); }
+.type-btn.active::before { opacity:1; }
+.t-icon { font-size:1.25rem; }
+.t-count { margin-left:auto; background:rgba(249,115,22,0.15); color:var(--orange); font-size:.68rem; font-weight:700; padding:.12rem .5rem; border-radius:20px; transition:all .22s; }
+.type-btn.active .t-count { background:var(--orange); color:#fff; }
+
+/* Filter bar */
+.filter-bar {
+  display:flex; align-items:center; gap:1rem;
+  padding:.9rem 1.25rem; background:var(--card);
+  border:1px solid var(--border); border-radius:13px;
+  margin-bottom:1.1rem; flex-wrap:wrap;
+}
+.fsearch { display:flex; align-items:center; gap:.55rem; flex:1; min-width:160px; }
+.fsearch svg { color:var(--gray); flex-shrink:0; }
+.fsearch input { flex:1; background:transparent; border:none; outline:none; color:var(--light); font-family:var(--font-body); font-size:.88rem; }
+.fsearch input::placeholder { color:var(--gray); }
+.fsep { width:1px; height:20px; background:var(--border); flex-shrink:0; }
+.level-pills { display:flex; gap:.35rem; }
+.level-pill {
+  display:flex; align-items:center; gap:.3rem;
+  padding:.38rem .9rem; border-radius:7px;
+  border:1.5px solid var(--border); background:transparent;
+  color:var(--gray); font-family:var(--font-body); font-size:.78rem; font-weight:700;
+  cursor:pointer; transition:all .18s; white-space:nowrap;
+}
+.level-pill:hover { color:var(--light); border-color:rgba(255,255,255,0.18); }
+.level-pill.active[data-level="beginner"]     { border-color:var(--green); color:var(--green);  background:rgba(34,197,94,0.1);  }
+.level-pill.active[data-level="intermediate"] { border-color:#f59e0b;      color:#f59e0b;       background:rgba(245,158,11,0.1); }
+.level-pill.active[data-level="pro"]          { border-color:var(--red);   color:var(--red);    background:rgba(239,68,68,0.1);  }
+
+/* Muscle group filter */
+.muscle-row { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; margin-bottom:0; }
+.muscle-label { font-size:.75rem; font-weight:700; color:var(--gray); text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; }
+.muscle-btn {
+  padding:.35rem .9rem; border-radius:7px;
+  border:1px solid var(--border); background:transparent;
+  color:var(--gray); font-family:var(--font-body); font-size:.78rem; font-weight:600;
+  cursor:pointer; transition:all .18s;
+}
+.muscle-btn:hover { color:var(--light); border-color:rgba(255,255,255,0.15); }
+.muscle-btn.active { background:var(--orange); border-color:var(--orange); color:#fff; }
+
+/* ── MAIN SECTION ─────────────────────────────── */
+.wo-main { max-width:1320px; margin:0 auto; padding:2rem 2rem 5rem; }
+
+/* Day block */
+.day-block { margin-bottom:3rem; }
+.day-block.hidden { display:none; }
+
+.day-header {
+  display:flex; align-items:center; gap:1.1rem;
+  padding:1.1rem 1.4rem;
+  background:linear-gradient(135deg, var(--bg3) 0%, rgba(26,30,40,0.5) 100%);
+  border:1px solid var(--border); border-radius:14px;
+  margin-bottom:1.25rem; cursor:pointer;
+  transition:border-color .2s, box-shadow .2s;
+  position:relative; overflow:hidden;
+}
+.day-header::after {
+  content:attr(data-num);
+  position:absolute; right:1.5rem; top:50%; transform:translateY(-50%);
+  font-family:var(--font-head); font-size:5rem; color:rgba(249,115,22,0.04);
+  line-height:1; pointer-events:none; letter-spacing:-.02em;
+}
+.day-header:hover { border-color:rgba(249,115,22,0.3); box-shadow:0 4px 20px rgba(0,0,0,0.3); }
+.day-num-badge {
+  width:48px; height:48px; border-radius:12px; flex-shrink:0;
+  background:linear-gradient(135deg,var(--orange),#ea6c10);
+  color:#fff; font-family:var(--font-head); font-size:1.5rem;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 14px rgba(249,115,22,0.35);
+  transition:transform .2s, box-shadow .2s;
+}
+.day-header:hover .day-num-badge { transform:scale(1.06) rotate(-2deg); box-shadow:0 6px 20px rgba(249,115,22,0.5); }
+.day-header-info { flex:1; }
+.day-header-info h3 { font-family:var(--font-head); font-size:1.4rem; letter-spacing:.04em; color:#fff; line-height:1; margin-bottom:.2rem; }
+.day-header-info .dfocus { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:var(--orange); }
+.day-ex-count { margin-left:auto; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:var(--gray); font-size:.7rem; font-weight:700; padding:.2rem .7rem; border-radius:20px; white-space:nowrap; z-index:1; }
+
+/* ══════════════════════════════════════════════════
+   3D FLIP CARDS
+   ══════════════════════════════════════════════════ */
+.flip-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(235px, 1fr));
+  gap:1rem;
+  perspective:1200px;
+}
+
+.flip-item { height:380px; cursor:pointer; }
+.flip-item.hidden { display:none; }
+
+.flip-inner {
+  position:relative; width:100%; height:100%;
+  transform-style:preserve-3d;
+  transition:transform .65s cubic-bezier(.4,0,.2,1);
+  border-radius:16px;
+}
+.flip-item.flipped .flip-inner { transform:rotateY(180deg); }
+
+.flip-face {
+  position:absolute; inset:0;
+  border-radius:16px;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.07);
+  box-shadow:0 4px 20px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.05) inset;
+}
+
+/* ── FRONT FACE ── */
+.flip-front {
+  background:linear-gradient(160deg,#22273a 0%,#1b1f2e 100%);
+  display:flex; flex-direction:column;
+}
+
+/* Image area */
+.ff-img {
+  position:relative; height:175px; overflow:hidden; flex-shrink:0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(249,115,22,0.28), transparent 34%),
+    radial-gradient(circle at 82% 24%, rgba(59,130,246,0.2), transparent 30%),
+    linear-gradient(140deg, #12151e 0%, #181d2a 100%);
+}
+.ff-photo {
+  width:100%; height:100%; object-fit:cover; object-position:center;
+  transition:transform .5s ease, filter .4s ease;
+  filter:brightness(.75) saturate(1.15);
+}
+.flip-item:hover .ff-photo { transform:scale(1.07); filter:brightness(.6) saturate(1.25); }
+.ff-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,.05) 0%,rgba(0,0,0,.18) 40%,rgba(0,0,0,.75) 90%,rgba(0,0,0,.88) 100%);
+  z-index:1;
+}
+.ff-overlay::after {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse at 50% 100%,rgba(249,115,22,0.2) 0%,transparent 65%);
+  opacity:0; transition:opacity .35s;
+}
+.flip-item:hover .ff-overlay::after { opacity:1; }
+.ff-badges { position:absolute; top:9px; left:9px; z-index:3; display:flex; gap:.35rem; flex-wrap:wrap; }
+.ff-hint { position:absolute; top:9px; right:9px; z-index:3; width:26px; height:26px; border-radius:7px; background:rgba(13,15,20,.72); border:1px solid rgba(255,255,255,.12); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; font-size:.75rem; color:rgba(255,255,255,.7); transition:background .2s; }
+.flip-item:hover .ff-hint { background:rgba(249,115,22,.2); color:var(--orange); }
+.ff-emoji { position:absolute; bottom:9px; right:9px; z-index:3; width:36px; height:36px; border-radius:9px; background:rgba(13,15,20,.72); border:1px solid rgba(255,255,255,.12); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; font-size:1.2rem; transition:transform .25s, box-shadow .25s; }
+.flip-item:hover .ff-emoji { transform:scale(1.1) translateY(-2px); box-shadow:0 4px 14px rgba(249,115,22,.3); }
+.fbadge { font-size:.58rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; padding:.15rem .5rem; border-radius:4px; }
+.fb-type { background:rgba(59,130,246,.15); color:#7ab5ff; border:1px solid rgba(59,130,246,.2); }
+.fb-beg  { background:rgba(34,197,94,.15);  color:#4ade80; border:1px solid rgba(34,197,94,.2);  }
+.fb-int  { background:rgba(245,158,11,.15); color:#fbbf24; border:1px solid rgba(245,158,11,.2); }
+.fb-pro  { background:rgba(239,68,68,.15);  color:#f87171; border:1px solid rgba(239,68,68,.2);  }
+
+/* Front body */
+.ff-body { padding:.85rem 1rem 1rem; flex:1; display:flex; flex-direction:column; }
+.ff-name { font-size:.95rem; font-weight:700; color:#fff; margin-bottom:.2rem; letter-spacing:-.01em; line-height:1.2; }
+.ff-muscle { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--orange); margin-bottom:.5rem; display:flex; align-items:center; gap:.3rem; }
+.ff-desc {
+    color: var(--gray);
+    font-size: .78rem;
+    line-height: 1.5;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: .8rem;
+}
+.ff-stats {
+  display:flex; gap:0;
+  border:1px solid var(--border); border-radius:9px; overflow:hidden; flex-shrink:0;
+}
+.ff-stat { flex:1; text-align:center; padding:.4rem .2rem; border-right:1px solid var(--border); background:var(--bg3); }
+.ff-stat:last-child { border-right:none; }
+.ff-stat .sv { display:block; font-size:.72rem; font-weight:700; color:var(--light); }
+.ff-stat .sk { display:block; font-size:.56rem; text-transform:uppercase; letter-spacing:.06em; color:var(--gray); margin-top:.08rem; }
+
+/* ── BACK FACE ── */
+.flip-back {
+  background:linear-gradient(160deg,#191d2b 0%,#141829 100%);
+  transform:rotateY(180deg);
+  display:flex; flex-direction:column;
+}
+
+/* Back header — mini image strip */
+.fb-head {
+  position:relative; height:80px; overflow:hidden; flex-shrink:0;
+}
+.fb-head-img {
+  width:100%; height:100%; object-fit:cover; object-position:center;
+  filter:brightness(.45) saturate(1.1);
+}
+.fb-head-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,0.1),rgba(25,29,43,0.95));
+}
+.fb-head-content {
+  position:absolute; inset:0; z-index:2;
+  display:flex; align-items:center; gap:.7rem; padding:.75rem 1rem;
+}
+.fb-head-emoji { font-size:1.5rem; filter:drop-shadow(0 2px 8px rgba(249,115,22,0.4)); flex-shrink:0; }
+.fb-head-text strong { display:block; font-size:.92rem; font-weight:700; color:#fff; line-height:1.2; }
+.fb-head-text span { font-size:.66rem; text-transform:uppercase; letter-spacing:.07em; color:var(--orange); font-weight:700; }
+.fb-close-btn {
+  margin-left:auto; width:26px; height:26px; border-radius:7px;
+  background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.25);
+  color:#f87171; font-size:.8rem; display:flex; align-items:center;
+  justify-content:center; flex-shrink:0; transition:background .2s; cursor:pointer;
+}
+.fb-close-btn:hover { background:rgba(239,68,68,.22); }
+
+/* Back body */
+.fb-body { padding:.8rem 1rem; flex:1; overflow-y:auto; }
+.fb-body::-webkit-scrollbar { width:3px; }
+.fb-body::-webkit-scrollbar-track { background:transparent; }
+.fb-body::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+.fb-row {
+  display:flex; align-items:center; gap:.6rem;
+  padding:.45rem 0; border-bottom:1px solid rgba(42,47,63,.5);
+  font-size:.8rem;
+}
+.fb-row:last-child { border-bottom:none; }
+.fb-row .ri { font-size:.9rem; width:18px; flex-shrink:0; }
+.fb-row .rl { color:var(--gray); font-size:.72rem; width:88px; flex-shrink:0; }
+.fb-row .rv { color:var(--light); font-weight:600; flex:1; }
+
+/* Intensity bar */
+.fb-intensity { margin-top:.6rem; }
+.fb-int-head { display:flex; justify-content:space-between; font-size:.66rem; color:var(--gray); margin-bottom:.3rem; text-transform:uppercase; letter-spacing:.07em; }
+.fb-int-track { height:5px; background:var(--border); border-radius:3px; overflow:hidden; }
+.fb-int-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--orange),#ef4444); transition:width .6s ease; }
+
+/* Empty state */
+.wo-empty { text-align:center; padding:4rem 2rem; color:var(--gray); }
+.wo-empty .ei { font-size:3rem; margin-bottom:1rem; }
+
+/* Fade-in */
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:translateY(0);} }
+.fade-in { animation:fadeUp .38s ease forwards; }
+
+/* Responsive */
+@media(max-width:768px){
+  .wo-hero{ padding:5rem 1.25rem 3.5rem; }
+  .wo-controls,.wo-main{ padding-left:1.25rem; padding-right:1.25rem; }
+  .type-row{ gap:.5rem; }
+  .type-btn{ padding:.7rem 1.1rem; font-size:.84rem; }
+  .filter-bar{ flex-direction:column; align-items:stretch; }
+  .fsep{ width:100%; height:1px; }
+  .flip-grid{ grid-template-columns:repeat(auto-fill, minmax(195px,1fr)); }
+  .flip-item{ height:355px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<div class="wo-hero">
+  <div class="wo-hero-grid"></div>
+  <div class="wo-glow g1"></div>
+  <div class="wo-glow g2"></div>
+  <div class="wo-hero-content">
+    <div class="wo-eyebrow">🏋️ &nbsp;FlexPlan Training</div>
+    <h1>Your <span class="ac">6-Day</span><br>Training Plan</h1>
+    <p class="wo-hero-sub">Structured daily workouts with flip cards — tap any exercise to see full details, stats and tips.</p>
+    <div class="wo-chips">
+      <div class="wo-chip"><span class="cn">36+</span><span class="cl">Exercises</span></div>
+      <div class="wo-chip"><span class="cn">6</span><span class="cl">Days</span></div>
+      <div class="wo-chip"><span class="cn">3</span><span class="cl">Levels</span></div>
+      <div class="wo-chip"><span class="cn">2</span><span class="cl">Modes</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="wo-controls">
+  <!-- Type -->
+  <div class="type-row">
+    <button class="type-btn active" data-type="dumbbell">
+      <span class="t-icon">🏋️</span> Dumbbell Workouts <span class="t-count">18</span>
+    </button>
+    <button class="type-btn" data-type="bodyweight">
+      <span class="t-icon">🤸</span> Bodyweight Workouts <span class="t-count">18</span>
+    </button>
+  </div>
+  <!-- Filter -->
+  <div class="filter-bar">
+    <div class="fsearch">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Search exercises or muscle groups…">
+    </div>
+    <div class="fsep"></div>
+    <div class="level-pills">
+      <button class="level-pill active" data-level="beginner">🟢 Beginner</button>
+      <button class="level-pill" data-level="intermediate">🟡 Intermediate</button>
+      <button class="level-pill" data-level="pro">🔴 Pro</button>
+    </div>
+  </div>
+  <!-- Muscle -->
+  <div class="muscle-row" id="muscleRow">
+    <span class="muscle-label">Muscle:</span>
+    <button class="muscle-btn active" data-muscle="all">All Groups</button>
+    <button class="muscle-btn" data-muscle="arms">💪 Arms</button>
+    <button class="muscle-btn" data-muscle="chest">🫁 Chest</button>
+    <button class="muscle-btn" data-muscle="back">🔙 Back</button>
+    <button class="muscle-btn" data-muscle="shoulders">🏆 Shoulders</button>
+    <button class="muscle-btn" data-muscle="legs">🦵 Legs</button>
+    <button class="muscle-btn" data-muscle="core">🔥 Core</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="wo-main" id="woMain"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* ══════════════════════════════════════════════════
+   EXERCISE DATABASE — all exercises across all days
+   ══════════════════════════════════════════════════ */
+const U = "https://images.unsplash.com/photo-";
+const Q = "?w=480&h=360&fit=crop&q=80&auto=format";
+
+const EXDB = {
+  // ── DUMBBELL ARMS ────────────────────────────────
+  "Dumbbell Bicep Curl":    {muscle:"Biceps",           group:"arms",      icon:"💪", desc:"Classic curl targeting biceps for size and strength. Keep elbows fixed to your sides.",       time:"15 min",kcal:"90 kcal", equip:"Dumbbells",     intensity:40, img:"{{ url_for('static', filename='image/exercises/bicepcurl1.gif') }}"},
+  "Hammer Curl":            {muscle:"Biceps & Forearms",group:"arms",      icon:"🔨", desc:"Neutral-grip curl for overall arm development. Builds both peak and forearm thickness.",       time:"12 min",kcal:"80 kcal", equip:"Dumbbells",     intensity:38, img:"{{ url_for('static', filename='image/exercises/hammercurl.gif') }}"},
+  "Reverse Wrist Curl":     {muscle:"Forearms",         group:"arms",      icon:"🤜", desc:"Targets the extensor muscles of the forearm. Slow and controlled for best results.",          time:"10 min",kcal:"55 kcal", equip:"Dumbbells",     intensity:30, img:"{{ url_for('static', filename='image/exercises/reversewristcurl.gif') }}"},
+  "Wrist Curl":             {muscle:"Forearms",         group:"arms",      icon:"🖐", desc:"Flexor-focused forearm exercise. Keep the rep range high for maximum pump.",                   time:"10 min",kcal:"50 kcal", equip:"Dumbbells",     intensity:28, img:"{{ url_for('static', filename='image/exercises/wristcurl.gif') }}"},
+  "Zottman Curl":           {muscle:"Biceps & Forearms",group:"arms",      icon:"💪", desc:"Combines supination and pronation for maximum arm growth. Slow on the way down.",             time:"15 min",kcal:"100 kcal",equip:"Dumbbells",     intensity:62, img:"{{ url_for('static', filename='image/exercises/zottmancurl.gif') }}"},
+  "Farmer's Carry":        {muscle:"Full Body / Grip", group:"arms",      icon:"🌾", desc:"Loaded carry building grip, traps and total conditioning. Walk tall with purpose.",           time:"12 min",kcal:"120 kcal",equip:"Dumbbells",     intensity:60, img:"{{ url_for('static', filename='image/exercises/farmerscarry.jpeg') }}"},
+  "Farmer's Carry (heavy)":{muscle:"Full Body / Grip", group:"arms",      icon:"🌾", desc:"Heavy loaded carry for elite grip and trap development. Set your lats, walk fast.",           time:"14 min",kcal:"140 kcal",equip:"Heavy Dumbbells",intensity:82, img:"{{ url_for('static', filename='image/exercises/farmerscarry.jpeg') }}"},
+  "Heavy Dumbbell Curl":    {muscle:"Biceps",           group:"arms",      icon:"💪", desc:"Max-load curl for peak bicep hypertrophy. Use a weight that makes rep 8 a grind.",           time:"16 min",kcal:"105 kcal",equip:"Heavy Dumbbells",intensity:85, img:"{{ url_for('static', filename='image/exercises/bicepcurl1.gif') }}"},
+  "Reverse Curl":           {muscle:"Brachialis & Forearms",group:"arms",  icon:"🔄", desc:"Overhand-grip curl hitting the brachialis and forearm extensors hard.",                       time:"12 min",kcal:"80 kcal", equip:"Dumbbells",     intensity:68, img:"{{ url_for('static', filename='image/exercises/reversewristcurl.gif') }}"},
+  // ── DUMBBELL SHOULDERS ──────────────────────────
+  "Dumbbell Front Raise":   {muscle:"Anterior Deltoid", group:"shoulders", icon:"🏋️", desc:"Isolates the front head of the deltoid. Control the descent — don't drop the weight.",     time:"12 min",kcal:"85 kcal", equip:"Dumbbells",     intensity:38, img:"{{ url_for('static', filename='image/exercises/DumbbellFrontRaises.gif') }}"},
+  "Lateral Raise":          {muscle:"Lateral Deltoid",  group:"shoulders", icon:"🦅", desc:"Side delt isolation for width. Lead with the elbow, stop at shoulder height.",               time:"12 min",kcal:"80 kcal", equip:"Dumbbells",     intensity:36, img:"{{ url_for('static', filename='image/exercises/dumbbelllateralraises.gif') }}"},
+  "Dumbbell Shoulder Press":{muscle:"Shoulders",        group:"shoulders", icon:"🏋️", desc:"Overhead press for shoulder mass and strength. Control the descent fully.",                  time:"15 min",kcal:"110 kcal",equip:"Dumbbells",     intensity:52, img:"{{ url_for('static', filename='image/exercises/shoulderpress.gif') }}"},
+  "Dumbbell Shrugs":        {muscle:"Trapezius",        group:"shoulders", icon:"🏔️", desc:"Upper trap builder. Squeeze hard at the top and hold for a full second.",                   time:"10 min",kcal:"70 kcal", equip:"Dumbbells",     intensity:34, img:"{{ url_for('static', filename='image/exercises/shrugpress.gif') }}"},
+  "Arnold Press":           {muscle:"Full Shoulders",   group:"shoulders", icon:"🏆", desc:"Full shoulder engagement through rotation — hits all three heads for total development.",     time:"18 min",kcal:"130 kcal",equip:"Dumbbells",     intensity:66, img:"{{ url_for('static', filename='image/exercises/benchpress.gif') }}"},
+  "Shrugs":                 {muscle:"Trapezius",        group:"shoulders", icon:"🏔️", desc:"Mid-weight trap exercise. Use full range — all the way down, squeeze all the way up.",      time:"10 min",kcal:"72 kcal", equip:"Dumbbells",     intensity:58, img:"{{ url_for('static', filename='image/exercises/shrugs.gif') }}"},
+  "Upright Row":            {muscle:"Traps & Delts",    group:"shoulders", icon:"⬆️", desc:"Compound shoulder movement. Pull to chin level — keep elbows above wrists at the top.",     time:"14 min",kcal:"95 kcal", equip:"Dumbbells",     intensity:60, img:"{{ url_for('static', filename='image/exercises/uprightrow.gif') }}"},
+  "Dumbbell Push Press":    {muscle:"Shoulders & Triceps",group:"shoulders",icon:"💥", desc:"Explosive overhead press using leg drive for maximum power. Light dip — then explode up.",  time:"18 min",kcal:"160 kcal",equip:"Dumbbells",     intensity:85, img:"{{ url_for('static', filename='image/exercises/dumbbellpushpress.gif') }}"},
+  "Lateral Raise (slow)":   {muscle:"Lateral Deltoid",  group:"shoulders", icon:"🦅", desc:"Tempo lateral raise — 3 seconds up, 3 seconds down. Brutal on the side delts.",             time:"15 min",kcal:"88 kcal", equip:"Dumbbells",     intensity:72, img:"{{ url_for('static', filename='image/exercises/dumbbelllateralraises.gif') }}"},
+  "Shrugs (heavy)":         {muscle:"Trapezius",        group:"shoulders", icon:"🏔️", desc:"Heavy trap shrugs for thickness. Squeeze 2 seconds at the top, lower slowly.",             time:"12 min",kcal:"80 kcal", equip:"Heavy Dumbbells",intensity:80, img:"{{ url_for('static', filename='image/exercises/shrugpress.gif') }}"},
+  // ── DUMBBELL CORE ───────────────────────────────
+  "Dumbbell Russian Twists":{muscle:"Obliques & Core",  group:"core",      icon:"🔄", desc:"Seated rotational core exercise. Keep feet off the floor for extra challenge.",             time:"12 min",kcal:"75 kcal", equip:"Dumbbell",      intensity:38, img:"{{ url_for('static', filename='image/exercises/russiantwist.gif') }}"},
+  "Plank Hold":             {muscle:"Full Core",         group:"core",      icon:"🧱", desc:"Isometric core hold. Squeeze glutes, abs and lats simultaneously — no sagging.",            time:"8 min", kcal:"50 kcal", equip:"None",          intensity:32, img:"{{ url_for('static', filename='image/exercises/plankhold.gif') }}"},
+  "Side Bend":              {muscle:"Obliques",          group:"core",      icon:"↔️", desc:"Lateral dumbbell bend for oblique strength. Full range — lower all the way, squeeze up.",   time:"10 min",kcal:"60 kcal", equip:"Dumbbell",      intensity:34, img:"{{ url_for('static', filename='image/exercises/sidebend.gif') }}"},
+  "Weighted Sit-ups":       {muscle:"Abs",               group:"core",      icon:"🏋️", desc:"Loaded sit-up for abdominal strength. Hold plate to chest, full ROM every rep.",            time:"10 min",kcal:"70 kcal", equip:"Weight Plate",  intensity:38, img:"{{ url_for('static', filename='image/exercises/weightedsitups.gif') }}"},
+  "Plank w/ Dumbbell Drag": {muscle:"Core & Shoulders",  group:"core",      icon:"🧱", desc:"Anti-rotation plank with drag challenge. Keep hips square while you cross-drag the weight.",time:"12 min",kcal:"85 kcal", equip:"Dumbbell",      intensity:62, img:"{{ url_for('static', filename='image/exercises/plankdumbbelldrag.gif') }}"},
+  "Weighted Russian Twists":{muscle:"Obliques & Core",  group:"core",      icon:"🔄", desc:"Loaded rotational core work. Slower and heavier — control every inch.",                     time:"14 min",kcal:"90 kcal", equip:"Dumbbell",      intensity:64, img:"{{ url_for('static', filename='image/exercises/russiantwist.gif') }}"},
+  "Hanging Leg Raises":     {muscle:"Abs & Hip Flexors", group:"core",      icon:"🎯", desc:"Advanced hanging core. Avoid swinging — tuck pelvis and curl up deliberately.",             time:"15 min",kcal:"100 kcal",equip:"Pull-up Bar",   intensity:78, img:"{{ url_for('static', filename='image/exercises/hangingleg.gif') }}"},
+  "Plank w/ Shoulder Taps": {muscle:"Core & Stability",  group:"core",      icon:"🧱", desc:"Anti-rotation plank progression. Tap opposite shoulder without twisting your hips.",        time:"12 min",kcal:"80 kcal", equip:"None",          intensity:72, img:"{{ url_for('static', filename='image/exercises/shouldertap.jpeg') }}"},
+  // ── DUMBBELL CHEST ──────────────────────────────
+  "Dumbbell Bench Press":   {muscle:"Chest",             group:"chest",     icon:"🏋️", desc:"Fundamental chest builder — greater ROM than barbell for improved muscle stretch.",          time:"18 min",kcal:"130 kcal",equip:"Dumbbells+Bench",intensity:55, img:"{{ url_for('static', filename='image/exercises/benchpress.gif') }}"},
+  "Dumbbell Fly":           {muscle:"Chest (Stretch)",   group:"chest",     icon:"🕊️", desc:"Cable-like chest stretch with dumbbells. Lower slowly, feel the full pec stretch.",         time:"14 min",kcal:"100 kcal",equip:"Dumbbells+Bench",intensity:50, img:"{{ url_for('static', filename='image/exercises/flys.gif') }}"},
+  "Incline Dumbbell Press": {muscle:"Upper Chest",       group:"chest",     icon:"📈", desc:"Targets the upper chest fibers. Set bench to 30-45° for optimal clavicular activation.",    time:"16 min",kcal:"115 kcal",equip:"Dumbbells+Bench",intensity:58, img:"{{ url_for('static', filename='image/exercises/incline.gif') }}"},
+  "Push-ups":               {muscle:"Chest & Triceps",   group:"chest",     icon:"💪", desc:"Classic pressing movement. 2-second descent for max tension throughout the range.",          time:"10 min",kcal:"70 kcal", equip:"None",          intensity:35, img:"{{ url_for('static', filename='image/exercises/pushup.gif') }}"},
+  "Dumbbell Pullover":      {muscle:"Chest & Lats",      group:"chest",     icon:"🎯", desc:"Classic ribcage expander hitting chest and lats. Keep hips below bench for full lat stretch.",time:"14 min",kcal:"105 kcal",equip:"Dumbbell+Bench", intensity:55, img:"{{ url_for('static', filename='image/exercises/dumbbellpullover.gif') }}"},
+  "Bench Press (heavy)":    {muscle:"Chest",             group:"chest",     icon:"👑", desc:"Max-load dumbbell bench for chest strength. Control the eccentric — explode on the press.",  time:"20 min",kcal:"150 kcal",equip:"Heavy Dumbbells+Bench",intensity:90, img:"{{ url_for('static', filename='image/exercises/benchpress.gif') }}"},
+  "Weighted Push-ups":      {muscle:"Chest & Triceps",   group:"chest",     icon:"💪", desc:"Plate-loaded push-up for advanced chest pressing strength.",                                  time:"12 min",kcal:"90 kcal", equip:"Weight Plate",  intensity:78, img:"{{ url_for('static', filename='image/exercises/weightedpushup.gif') }}"},
+  // ── DUMBBELL BACK ───────────────────────────────
+  "Deadlift (light)":       {muscle:"Full Posterior",    group:"back",      icon:"🏋️", desc:"Hip-hinge foundation. Light weight to perfect form — neutral spine, lats packed in.",       time:"15 min",kcal:"110 kcal",equip:"Dumbbells",     intensity:42, img:"{{ url_for('static', filename='image/exercises/deadlift.gif') }}"},
+  "Dumbbell Bent-over Rows":{muscle:"Back",              group:"back",      icon:"🔙", desc:"Build back thickness and improve posture. Hinge at hips, keep spine neutral throughout.",    time:"15 min",kcal:"115 kcal",equip:"Dumbbells",     intensity:50, img:"{{ url_for('static', filename='image/exercises/bentover.gif') }}"},
+  "One-arm Dumbbell Row":   {muscle:"Lats & Rhomboids",  group:"back",      icon:"💪", desc:"Unilateral row for full lat engagement. Drive the elbow to the hip — squeeze hard.",        time:"14 min",kcal:"105 kcal",equip:"Dumbbell+Bench", intensity:52, img:"{{ url_for('static', filename='image/exercises/onearmrow.gif') }}"},
+  "Reverse Fly":            {muscle:"Rear Deltoid",      group:"back",      icon:"🕊️", desc:"Posterior delt and upper-back isolation. Lead with the elbows — pinch shoulder blades.",    time:"12 min",kcal:"80 kcal", equip:"Dumbbells",     intensity:40, img:"{{ url_for('static', filename='image/exercises/reverseflys.gif') }}"},
+  "Bent-over Rows":         {muscle:"Back",              group:"back",      icon:"🔙", desc:"Mid-weight bent-over rows for back thickness. Neutral spine — row to the hip crease.",       time:"16 min",kcal:"125 kcal",equip:"Dumbbells",     intensity:65, img:"{{ url_for('static', filename='image/exercises/bentover.gif') }}"},
+  "Deadlift":               {muscle:"Full Posterior",    group:"back",      icon:"🏋️", desc:"The king of posterior chain movements. Brace hard, push the floor away, stand tall.",       time:"18 min",kcal:"150 kcal",equip:"Dumbbells",     intensity:72, img:"{{ url_for('static', filename='image/exercises/deadlift1.gif') }}"},
+  "Renegade Rows":          {muscle:"Back & Core",       group:"back",      icon:"⚡", desc:"Plank-position rows for back and anti-rotation core. Keep hips level — no twisting.",        time:"16 min",kcal:"135 kcal",equip:"Dumbbells",     intensity:68, img:"{{ url_for('static', filename='image/exercises/renegaderows.jpeg') }}"},
+  "Bent-over Rows (heavy)": {muscle:"Back",              group:"back",      icon:"👑", desc:"Heavy bent-over rows for maximum back thickness. Control both directions.",                  time:"20 min",kcal:"165 kcal",equip:"Heavy Dumbbells",intensity:88, img:"{{ url_for('static', filename='image/exercises/bentover.gif') }}"},
+  "Deadlift (heavy)":       {muscle:"Full Posterior",    group:"back",      icon:"👑", desc:"Heavy deadlift — king of all exercises. Set lats hard before every single rep.",             time:"25 min",kcal:"195 kcal",equip:"Heavy Dumbbells",intensity:95, img:"{{ url_for('static', filename='image/exercises/deadlift1.gif') }}"},
+  // ── DUMBBELL LEGS ───────────────────────────────
+  "Calf Raises":            {muscle:"Calves",            group:"legs",      icon:"🦶", desc:"Calf isolation — full ROM, pause at the bottom and squeeze hard at the top.",               time:"10 min",kcal:"60 kcal", equip:"Dumbbells",     intensity:32, img:"{{ url_for('static', filename='image/exercises/calfraise.gif') }}"},
+  "Dumbbell Lunges":        {muscle:"Quads & Glutes",    group:"legs",      icon:"🦵", desc:"Unilateral leg work for strength and balance. Keep torso upright throughout the descent.",  time:"15 min",kcal:"120 kcal",equip:"Dumbbells",     intensity:48, img:"{{ url_for('static', filename='image/exercises/dumbbellslungs.gif') }}"},
+  "Dumbbell Step-ups":      {muscle:"Quads & Glutes",    group:"legs",      icon:"🪜", desc:"Step-up for unilateral quad and glute strength. Drive through the heel of the working leg.",time:"14 min",kcal:"115 kcal",equip:"Dumbbells+Bench",intensity:46, img:"{{ url_for('static', filename='image/exercises/dumbellsitups.gif') }}"},
+  "Goblet Squat":           {muscle:"Quads & Glutes",    group:"legs",      icon:"🦵", desc:"Front-loaded squat excellent for beginners. Naturally encourages upright posture.",          time:"14 min",kcal:"115 kcal",equip:"Dumbbell",      intensity:45, img:"{{ url_for('static', filename='image/exercises/gobletsquat.gif') }}"},
+  "Romanian Deadlift":      {muscle:"Hamstrings & Glutes",group:"legs",     icon:"🔥", desc:"Hip hinge targeting posterior chain. Maintain a long spine — feel the hamstring stretch.",  time:"18 min",kcal:"155 kcal",equip:"Dumbbells",     intensity:70, img:"{{ url_for('static', filename='image/exercises/ronniedeadlift.gif') }}"},
+  "Weighted Calf Raises":   {muscle:"Calves",            group:"legs",      icon:"🦶", desc:"Loaded calf raises for size and strength. Slow eccentric — never bounce at the bottom.",    time:"12 min",kcal:"72 kcal", equip:"Dumbbells",     intensity:55, img:"{{ url_for('static', filename='image/exercises/calfraise.gif') }}"},
+  "Dumbbell Front Squat":   {muscle:"Quads & Core",      group:"legs",      icon:"🏋️", desc:"Front-loaded squat demanding core stability. Keep elbows high — chest tall throughout.",    time:"18 min",kcal:"160 kcal",equip:"Dumbbells",     intensity:82, img:"{{ url_for('static', filename='image/exercises/frontsquat.gif') }}"},
+  "Jump Squats":            {muscle:"Legs & Glutes",     group:"legs",      icon:"⚡", desc:"Plyometric squat for explosive power. Land softly — absorb through the hips and knees.",    time:"14 min",kcal:"185 kcal",equip:"None",          intensity:85, img:"{{ url_for('static', filename='image/exercises/jumpsquat.gif') }}"},
+  "Walking Lunges":         {muscle:"Quads & Glutes",    group:"legs",      icon:"🚶", desc:"Dynamic lunge for leg development and balance. Cover distance — keep torso upright.",       time:"16 min",kcal:"148 kcal",equip:"Dumbbells",     intensity:80, img:"{{ url_for('static', filename='image/exercises/walkinglungs.gif') }}"},
+  // ── BODYWEIGHT ARMS/BACK ────────────────────────
+  "Wall Push-ups":          {muscle:"Chest & Triceps",   group:"chest",     icon:"🧱", desc:"Beginner vertical pressing movement. Perfect form foundation — body perfectly straight.",    time:"8 min", kcal:"45 kcal", equip:"Wall",          intensity:22, img:"{{ url_for('static', filename='image/exercises/wallpushup.jpeg') }}"},
+  "Inverted Rows":          {muscle:"Back",              group:"back",      icon:"🔙", desc:"Horizontal pull for back development. Rows are as important as push movements.",             time:"12 min",kcal:"80 kcal", equip:"Table/Bar",     intensity:40, img:"{{ url_for('static', filename='image/exercises/invertedrows.gif') }}"},
+  "Forearm Plank Hold":     {muscle:"Full Core",         group:"core",      icon:"🧱", desc:"Foundation isometric core exercise. Squeeze everything — it should burn everywhere.",        time:"8 min", kcal:"48 kcal", equip:"None",          intensity:30, img:"{{ url_for('static', filename='image/exercises/forearmplank.jpeg') }}"},
+  "Towel Grip Hold":        {muscle:"Grip & Forearms",   group:"arms",      icon:"🖐", desc:"Grip endurance training using a towel. Great for building forearm and finger strength.",      time:"8 min", kcal:"40 kcal", equip:"Towel",         intensity:25, img:"{{ url_for('static', filename='image/exercises/towelgrip.png') }}"},
+  "Pike Push-ups":          {muscle:"Shoulders",         group:"shoulders", icon:"🔱", desc:"Bodyweight shoulder press in pike position. Steeper pike = more shoulder activation.",      time:"10 min",kcal:"65 kcal", equip:"None",          intensity:38, img:"{{ url_for('static', filename='image/exercises/pilkpushup.gif') }}"},
+  "Arm Circles":            {muscle:"Shoulder Mobility", group:"shoulders", icon:"⭕", desc:"Shoulder warm-up and endurance. Start small — progressively increase the diameter.",         time:"6 min", kcal:"30 kcal", equip:"None",          intensity:15, img:"{{ url_for('static', filename='image/exercises/armcircle.gif') }}"},
+  "Shoulder Shrugs":        {muscle:"Trapezius",         group:"shoulders", icon:"🏔️", desc:"Bodyweight trap activation. Can add weight to progress — full range of motion.",            time:"8 min", kcal:"38 kcal", equip:"None",          intensity:18, img:"{{ url_for('static', filename='image/exercises/shouldershrug.jpeg') }}"},
+  "Wall Handstand Hold":    {muscle:"Shoulders & Core",  group:"shoulders", icon:"🤸", desc:"Inverted balance hold for shoulder stability. Build time gradually — 5s to 60s.",           time:"10 min",kcal:"60 kcal", equip:"Wall",          intensity:42, img:"{{ url_for('static', filename='image/exercises/wallstandhold.jpeg') }}"},
+  "Crunches":               {muscle:"Abs",               group:"core",      icon:"🏋️", desc:"Foundation ab isolation. Short ROM — squeeze hard at the top, slow on the way down.",       time:"8 min", kcal:"55 kcal", equip:"None",          intensity:25, img:"{{ url_for('static', filename='image/exercises/crunches.gif') }}"},
+  "Russian Twists":         {muscle:"Obliques",          group:"core",      icon:"🔄", desc:"Rotational core exercise. Feet off floor makes it harder — touch the ground on each side.", time:"10 min",kcal:"65 kcal", equip:"None",          intensity:35, img:"{{ url_for('static', filename='image/exercises/russiantwist1.gif') }}"},
+  "Plank":                  {muscle:"Full Core",         group:"core",      icon:"🧱", desc:"Isometric core hold. Squeeze glutes, abs and lats — no sagging, no piking.",                time:"8 min", kcal:"48 kcal", equip:"None",          intensity:30, img:"{{ url_for('static', filename='image/exercises/plank.gif') }}"},
+  "Mountain Climbers":      {muscle:"Core & Cardio",     group:"core",      icon:"🏔️", desc:"Dynamic cardio core exercise. Drive knees to chest as fast as form allows.",               time:"10 min",kcal:"90 kcal", equip:"None",          intensity:45, img:"{{ url_for('static', filename='image/exercises/mountainclimb.gif') }}"},
+  "Wide Push-ups":          {muscle:"Chest (Outer)",     group:"chest",     icon:"💪", desc:"Wide-stance push-up hitting outer chest fibers. Full descent — chest touches the floor.",   time:"10 min",kcal:"72 kcal", equip:"None",          intensity:36, img:"{{ url_for('static', filename='image/exercises/widepushup.gif') }}"},
+  "Incline Push-ups":       {muscle:"Lower Chest",       group:"chest",     icon:"📐", desc:"Hands-elevated push-up shifting emphasis to lower pecs. Great for beginners.",              time:"10 min",kcal:"65 kcal", equip:"Chair/Bench",   intensity:28, img:"{{ url_for('static', filename='image/exercises/inclinepushup.gif') }}"},
+  "Chest Dips (chair)":     {muscle:"Chest & Triceps",   group:"chest",     icon:"🪑", desc:"Chair dip focusing on chest. Lean forward to maximize chest activation.",                  time:"10 min",kcal:"80 kcal", equip:"Chair",         intensity:38, img:"{{ url_for('static', filename='image/exercises/chestdip.gif') }}"},
+  "Superman Hold":          {muscle:"Lower Back & Glutes",group:"back",     icon:"🦸", desc:"Prone back extension for spinal erectors and glutes. Squeeze and hold at the top.",          time:"8 min", kcal:"45 kcal", equip:"None",          intensity:25, img:"{{ url_for('static', filename='image/exercises/supermanhold.jpeg') }}"},
+  "Reverse Snow Angels":    {muscle:"Upper Back",        group:"back",      icon:"❄️", desc:"Prone arm sweep for upper-back and rear delt activation. Keep arms off the floor.",          time:"10 min",kcal:"52 kcal", equip:"None",          intensity:28, img:"{{ url_for('static', filename='image/exercises/reverseshowangel.png') }}"},
+  "Bird Dog":               {muscle:"Core & Back",       group:"core",      icon:"🐦", desc:"Quadruped anti-rotation stability exercise. Extend fully — hold 2 seconds at the top.",     time:"10 min",kcal:"55 kcal", equip:"None",          intensity:30, img:"{{ url_for('static', filename='image/exercises/birddog.gif') }}"},
+  "Squats":                 {muscle:"Quads & Glutes",    group:"legs",      icon:"🦵", desc:"Foundational squat for lower body strength. Thighs below parallel — full depth.",           time:"12 min",kcal:"85 kcal", equip:"None",          intensity:35, img:"{{ url_for('static', filename='image/exercises/squat.gif') }}"},
+  "Lunges":                 {muscle:"Quads & Glutes",    group:"legs",      icon:"🦵", desc:"Stationary lunge for unilateral leg development. Keep torso upright throughout.",           time:"12 min",kcal:"90 kcal", equip:"None",          intensity:36, img:"{{ url_for('static', filename='image/exercises/lunges.gif') }}"},
+  "Step-ups":               {muscle:"Quads & Glutes",    group:"legs",      icon:"🪜", desc:"Step-up for unilateral leg strength. Drive through the heel of the working leg.",           time:"12 min",kcal:"88 kcal", equip:"Chair/Bench",   intensity:38, img:"{{ url_for('static', filename='image/exercises/situps.gif') }}"},
+  "Calf Raises":            {muscle:"Calves",            group:"legs",      icon:"🦶", desc:"Calf isolation using bodyweight. Pause at top and bottom — full range every rep.",          time:"8 min", kcal:"48 kcal", equip:"None",          intensity:28, img:"{{ url_for('static', filename='image/exercises/calfraise.gif') }}"},
+  "Chin-ups (assisted)":    {muscle:"Back & Biceps",     group:"back",      icon:"🔝", desc:"Assisted chin-up with band or partner. Full hang at bottom, chin over bar at top.",         time:"14 min",kcal:"100 kcal",equip:"Pull-up Bar",   intensity:55, img:"{{ url_for('static', filename='image/exercises/chinup.gif') }}"},
+  "Forearm Plank Reach":    {muscle:"Core & Shoulders",  group:"core",      icon:"🧱", desc:"Dynamic plank with forward reach. Extend arm without letting hips rotate.",                 time:"10 min",kcal:"62 kcal", equip:"None",          intensity:52, img:"{{ url_for('static', filename='image/exercises/plankreach.gif') }}"},
+  "Towel Grip Pulls":       {muscle:"Grip & Lats",       group:"back",      icon:"🖐", desc:"Towel rows for grip and back. The unstable grip makes your hands and lats work harder.",    time:"12 min",kcal:"78 kcal", equip:"Towel+Bar",     intensity:58, img:"{{ url_for('static', filename='image/exercises/towelgrippull.png') }}"},
+  "Shoulder Taps":          {muscle:"Core & Shoulders",  group:"core",      icon:"🤜", desc:"High plank shoulder taps — tests anti-rotation strength. No hip movement allowed.",         time:"10 min",kcal:"65 kcal", equip:"None",          intensity:55, img:"{{ url_for('static', filename='image/exercises/shouldertap.jpeg') }}"},
+  "Shrug Holds":            {muscle:"Trapezius",         group:"shoulders", icon:"🏔️", desc:"Isometric trap hold — shrug up, hold for 3 seconds, slowly lower. Repeat.",               time:"8 min", kcal:"45 kcal", equip:"None",          intensity:48, img:"{{ url_for('static', filename='image/exercises/shrugshold.png') }}"},
+  "Hanging Knee Raises":    {muscle:"Abs & Hip Flexors", group:"core",      icon:"🪝", desc:"Hanging ab exercise — avoid swinging. Curl pelvis up, slow controlled descent.",           time:"12 min",kcal:"82 kcal", equip:"Pull-up Bar",   intensity:58, img:"{{ url_for('static', filename='image/exercises/hangingleg.gif') }}"},
+  "Side Plank":             {muscle:"Obliques & Core",   group:"core",      icon:"🧱", desc:"Lateral isometric core hold. Stack feet or stagger them — keep hips high.",                time:"10 min",kcal:"60 kcal", equip:"None",          intensity:52, img:"{{ url_for('static', filename='image/exercises/sideplank.jpeg') }}"},
+  "Burpees":                {muscle:"Full Body",         group:"core",      icon:"🔥", desc:"Full-body conditioning movement. Keep a steady rhythm — speed improves with practice.",     time:"10 min",kcal:"148 kcal",equip:"None",          intensity:72, img:"{{ url_for('static', filename='image/exercises/burpees.gif') }}"},
+  "Diamond Push-ups":       {muscle:"Triceps & Chest",   group:"chest",     icon:"💎", desc:"Close-grip push-up for maximum tricep activation. Hands form a diamond under sternum.",     time:"12 min",kcal:"88 kcal", equip:"None",          intensity:60, img:"{{ url_for('static', filename='image/exercises/diamondpushup.gif') }}"},
+  "Decline Push-ups":       {muscle:"Upper Chest",       group:"chest",     icon:"📐", desc:"Feet-elevated push-up for upper chest. Steeper elevation = higher chest involvement.",     time:"12 min",kcal:"92 kcal", equip:"Chair/Bench",   intensity:62, img:"{{ url_for('static', filename='image/exercises/decline.gif') }}"},
+  "Dips (chair)":           {muscle:"Triceps & Chest",   group:"chest",     icon:"🪑", desc:"Chair dips for tricep and lower chest mass. Lean forward slightly for more chest.",         time:"10 min",kcal:"85 kcal", equip:"Chair",         intensity:58, img:"{{ url_for('static', filename='image/exercises/chestdip.gif') }}"},
+  "Superman w/ Arm Lift":   {muscle:"Back & Glutes",     group:"back",      icon:"🦸", desc:"Superman with arm raise — extra load on spinal erectors and rear delts.",                   time:"10 min",kcal:"55 kcal", equip:"None",          intensity:48, img:"{{ url_for('static', filename='image/exercises/supermanhold.jpeg') }}"},
+  "Pull-ups (assisted)":    {muscle:"Back & Biceps",     group:"back",      icon:"🔝", desc:"Band-assisted pull-ups for back development. Use the thinnest band you can handle.",        time:"14 min",kcal:"105 kcal",equip:"Pull-up Bar+Band",intensity:60, img:"{{ url_for('static', filename='image/exercises/pullups.jpeg') }}"},
+  "Pull-ups":               {muscle:"Back & Biceps",     group:"back",      icon:"💪", desc:"The standard for back and bicep development. Dead hang to chin over bar — full ROM.",       time:"16 min",kcal:"120 kcal",equip:"Pull-up Bar",   intensity:78, img:"{{ url_for('static', filename='image/exercises/pullups.jpeg') }}"},
+  "Chin-ups":               {muscle:"Back & Biceps",     group:"back",      icon:"🔝", desc:"Supinated grip for more bicep involvement. Pull elbows to hips — not just chin up.",        time:"16 min",kcal:"115 kcal",equip:"Pull-up Bar",   intensity:76, img:"{{ url_for('static', filename='image/exercises/chinup.gif') }}"},
+  "Inverted Rows (slow)":   {muscle:"Back",              group:"back",      icon:"🔙", desc:"Tempo inverted rows — 3-second pull, 3-second lower. Brutal on the mid-back.",              time:"14 min",kcal:"90 kcal", equip:"Table/Bar",     intensity:68, img:"{{ url_for('static', filename='image/exercises/invertedrows.gif') }}"},
+  "Towel Grip Pull-ups":    {muscle:"Grip, Back & Biceps",group:"back",     icon:"🖐", desc:"Towel pull-ups for elite grip and lat strength. One of the hardest grip exercises.",        time:"16 min",kcal:"128 kcal",equip:"Towel+Pull-up Bar",intensity:88, img:"{{ url_for('static', filename='image/exercises/towelgrippull.png') }}"},
+  "Handstand Push-ups":     {muscle:"Shoulders & Triceps",group:"shoulders",icon:"🤸", desc:"Inverted overhead press — elite-level shoulder strength. Kick up, find balance, press.",   time:"20 min",kcal:"158 kcal",equip:"Wall",          intensity:92, img:"{{ url_for('static', filename='image/exercises/wallstandhold.jpeg') }}"},
+  "Pike Push-ups (slow)":   {muscle:"Shoulders",         group:"shoulders", icon:"🔱", desc:"Tempo pike push-ups — maximum time under tension. 3 up, 3 down every rep.",                time:"14 min",kcal:"78 kcal", equip:"None",          intensity:72, img:"{{ url_for('static', filename='image/exercises/pilkpushup.gif') }}"},
+  "Wall Walks":             {muscle:"Shoulders & Core",  group:"shoulders", icon:"🧱", desc:"Walk feet up wall to handstand. Builds shoulder endurance and full-body control.",          time:"14 min",kcal:"115 kcal",equip:"Wall",          intensity:82, img:"{{ url_for('static', filename='image/exercises/wallwalks.gif') }}"},
+  "Russian Twists (slow)":  {muscle:"Obliques",          group:"core",      icon:"🔄", desc:"Slow tempo Russian twists — 2 seconds each side. Elite oblique strength work.",             time:"14 min",kcal:"80 kcal", equip:"None",          intensity:78, img:"{{ url_for('static', filename='image/exercises/russiantwist1.gif') }}"},
+  "Side Plank w/ Hip Dips": {muscle:"Obliques & Core",   group:"core",      icon:"🧱", desc:"Dynamic side plank with lateral hip dips. Unmatched oblique burn — both sides.",          time:"12 min",kcal:"72 kcal", equip:"None",          intensity:80, img:"{{ url_for('static', filename='image/exercises/sideplank.jpeg') }}"},
+  "Clap Push-ups":          {muscle:"Chest & Power",     group:"chest",     icon:"👏", desc:"Explosive plyometric push-up for upper-body power. Explode hard — catch yourself clean.",   time:"14 min",kcal:"128 kcal",equip:"None",          intensity:88, img:"{{ url_for('static', filename='image/exercises/clappushup.gif') }}"},
+  "Dips (parallel bars)":   {muscle:"Triceps & Chest",   group:"chest",     icon:"🔩", desc:"Parallel bar dips for tricep and chest mass. Full dip — upper arms parallel to floor.",    time:"14 min",kcal:"112 kcal",equip:"Parallel Bars",intensity:82, img:"{{ url_for('static', filename='image/exercises/dips.gif') }}"},
+  "Pull-ups (weighted)":    {muscle:"Back & Biceps",     group:"back",      icon:"👑", desc:"Weighted pull-ups for elite back thickness. Add belt weight — full ROM every rep.",         time:"18 min",kcal:"140 kcal",equip:"Pull-up Bar+Belt",intensity:95, img:"{{ url_for('static', filename='image/exercises/pullups.jpeg') }}"},
+  "Archer Pull-ups":        {muscle:"Back & Biceps",     group:"back",      icon:"🏹", desc:"One-arm pull-up progression. Straighter the assist arm, harder the working side.",         time:"20 min",kcal:"138 kcal",equip:"Pull-up Bar",   intensity:90, img:"{{ url_for('static', filename='image/exercises/archerpullup.png') }}"},
+  "Superman w/ Arm+Leg":    {muscle:"Back & Glutes",     group:"back",      icon:"🦸", desc:"Full Superman with opposite arm/leg raise. Maximum spinal erector and glute activation.",   time:"12 min",kcal:"62 kcal", equip:"None",          intensity:72, img:"{{ url_for('static', filename='image/exercises/supermanarmleg.jpeg') }}"},
+  "Pistol Squats":          {muscle:"Quads & Balance",   group:"legs",      icon:"🎯", desc:"Single-leg squat demanding elite strength and balance. Extend free leg as counterbalance.",  time:"18 min",kcal:"148 kcal",equip:"None",          intensity:92, img:"{{ url_for('static', filename='image/exercises/pistol.jpeg') }}"},
+  "Jump Lunges":            {muscle:"Quads & Glutes",    group:"legs",      icon:"⚡", desc:"Plyometric alternating lunge — explosive power. Land softly, absorb through the knee.",     time:"14 min",kcal:"162 kcal",equip:"None",          intensity:88, img:"{{ url_for('static', filename='image/exercises/jumplungs.gif') }}"},
+  "Bulgarian Split Squats": {muscle:"Quads & Glutes",    group:"legs",      icon:"🇧🇬", desc:"Rear-foot elevated split squat — most of weight on front leg. Elite unilateral strength.", time:"18 min",kcal:"152 kcal",equip:"Chair/Bench",   intensity:90, img:"{{ url_for('static', filename='image/exercises/splitsquat.gif') }}"},
+  "Calf Raises (slow)":     {muscle:"Calves",            group:"legs",      icon:"🦶", desc:"Slow-tempo calf raises — 3 seconds up, 3 down. Maximum time under tension for size.",      time:"10 min",kcal:"58 kcal", equip:"None",          intensity:62, img:"{{ url_for('static', filename='image/exercises/calfraise1.jpeg') }}"},
+};
+
+/* ══════════════════════════════════════════════════
+   TRAINING DATA
+   ══════════════════════════════════════════════════ */
+const GROUP_IMAGE_LIBRARY = {
+  arms: "{{ url_for('static', filename='image/workouts/arms-strength.svg') }}",
+  shoulders: "{{ url_for('static', filename='image/workouts/shoulders-drive.svg') }}",
+  core: "{{ url_for('static', filename='image/workouts/core-control.svg') }}",
+  chest: "{{ url_for('static', filename='image/workouts/chest-power.svg') }}",
+  back: "{{ url_for('static', filename='image/workouts/back-pull.svg') }}",
+  legs: "{{ url_for('static', filename='image/workouts/legs-drive.svg') }}"
+};
+const DEFAULT_WORKOUT_IMAGE = "{{ url_for('static', filename='image/workouts/default-workout.svg') }}";
+
+function withLocalImage(info) {
+  return {
+    ...info,
+    img: info.img || GROUP_IMAGE_LIBRARY[info.group] || DEFAULT_WORKOUT_IMAGE
+  };
+}
+
+const DATA = {
+  dumbbell: {
+    beginner: { days:[
+      {day:"Day 1",focus:"Biceps & Forearms",exercises:[{name:"Dumbbell Bicep Curl",sets:"3×12"},{name:"Hammer Curl",sets:"3×12"},{name:"Reverse Wrist Curl",sets:"3×15"},{name:"Wrist Curl",sets:"3×15"}]},
+      {day:"Day 2",focus:"Shoulders",exercises:[{name:"Dumbbell Front Raise",sets:"3×12"},{name:"Lateral Raise",sets:"3×12"},{name:"Dumbbell Shoulder Press",sets:"3×12"},{name:"Dumbbell Shrugs",sets:"3×15"}]},
+      {day:"Day 3",focus:"Abs & Core",exercises:[{name:"Dumbbell Russian Twists",sets:"3×12"},{name:"Plank Hold",sets:"3×20s"},{name:"Side Bend",sets:"3×12 each"},{name:"Weighted Sit-ups",sets:"3×12"}]},
+      {day:"Day 4",focus:"Chest",exercises:[{name:"Dumbbell Bench Press",sets:"3×12"},{name:"Dumbbell Fly",sets:"3×12"},{name:"Incline Dumbbell Press",sets:"3×12"},{name:"Push-ups",sets:"3×10"}]},
+      {day:"Day 5",focus:"Back",exercises:[{name:"Deadlift (light)",sets:"3×12"},{name:"Dumbbell Bent-over Rows",sets:"3×12"},{name:"One-arm Dumbbell Row",sets:"3×12 each"},{name:"Reverse Fly",sets:"3×12"}]},
+      {day:"Day 6",focus:"Legs",exercises:[{name:"Calf Raises",sets:"3×15"},{name:"Dumbbell Lunges",sets:"3×10 each"},{name:"Dumbbell Step-ups",sets:"3×10 each"},{name:"Goblet Squat",sets:"3×12"}]}
+    ]},
+    intermediate: { days:[
+      {day:"Day 1",focus:"Biceps & Forearms",exercises:[{name:"Dumbbell Bicep Curl",sets:"4×12"},{name:"Farmer's Carry",sets:"3×30s"},{name:"Hammer Curl",sets:"4×12"},{name:"Wrist Curl",sets:"4×15"},{name:"Zottman Curl",sets:"3×10"}]},
+      {day:"Day 2",focus:"Shoulders",exercises:[{name:"Arnold Press",sets:"4×10"},{name:"Dumbbell Shoulder Press",sets:"4×12"},{name:"Lateral Raise",sets:"4×12"},{name:"Shrugs",sets:"4×15"},{name:"Upright Row",sets:"4×12"}]},
+      {day:"Day 3",focus:"Abs & Core",exercises:[{name:"Plank w/ Dumbbell Drag",sets:"4×20s"},{name:"Side Bend",sets:"4×12 each"},{name:"Weighted Russian Twists",sets:"4×15"},{name:"Weighted Sit-ups",sets:"4×12"}]},
+      {day:"Day 4",focus:"Chest",exercises:[{name:"Dumbbell Bench Press",sets:"4×12"},{name:"Dumbbell Fly",sets:"4×12"},{name:"Dumbbell Pullover",sets:"3×12"},{name:"Incline Dumbbell Press",sets:"4×12"}]},
+      {day:"Day 5",focus:"Back",exercises:[{name:"Bent-over Rows",sets:"4×12"},{name:"Deadlift",sets:"4×12"},{name:"One-arm Dumbbell Row",sets:"4×12 each"},{name:"Renegade Rows",sets:"3×10"},{name:"Reverse Fly",sets:"4×12"}]},
+      {day:"Day 6",focus:"Legs",exercises:[{name:"Dumbbell Lunges",sets:"4×12 each"},{name:"Dumbbell Step-ups",sets:"4×12 each"},{name:"Goblet Squat",sets:"4×12"},{name:"Romanian Deadlift",sets:"4×12"},{name:"Weighted Calf Raises",sets:"4×20"}]}
+    ]},
+    pro: { days:[
+      {day:"Day 1",focus:"Biceps & Forearms",exercises:[{name:"Farmer's Carry (heavy)",sets:"4×40s"},{name:"Heavy Dumbbell Curl",sets:"4×8"},{name:"Reverse Curl",sets:"4×10"},{name:"Wrist Curl",sets:"4×20"},{name:"Zottman Curl",sets:"4×8"}]},
+      {day:"Day 2",focus:"Shoulders",exercises:[{name:"Arnold Press",sets:"4×10"},{name:"Dumbbell Push Press",sets:"4×8"},{name:"Lateral Raise (slow)",sets:"4×12"},{name:"Shrugs (heavy)",sets:"4×20"},{name:"Upright Row",sets:"4×10"}]},
+      {day:"Day 3",focus:"Abs & Core",exercises:[{name:"Hanging Leg Raises",sets:"4×12"},{name:"Plank w/ Shoulder Taps",sets:"4×30s"},{name:"Side Bend",sets:"4×15 each"},{name:"Weighted Russian Twists",sets:"4×20"},{name:"Weighted Sit-ups",sets:"4×15"}]},
+      {day:"Day 4",focus:"Chest",exercises:[{name:"Bench Press (heavy)",sets:"4×8"},{name:"Dumbbell Fly",sets:"4×12"},{name:"Dumbbell Pullover",sets:"4×12"},{name:"Incline Dumbbell Press",sets:"4×10"},{name:"Weighted Push-ups",sets:"4×12"}]},
+      {day:"Day 5",focus:"Back",exercises:[{name:"Bent-over Rows (heavy)",sets:"4×8"},{name:"Deadlift (heavy)",sets:"4×8"},{name:"One-arm Dumbbell Row",sets:"4×10 each"},{name:"Renegade Rows",sets:"4×10"},{name:"Reverse Fly",sets:"4×12"}]},
+      {day:"Day 6",focus:"Legs",exercises:[{name:"Dumbbell Front Squat",sets:"4×10"},{name:"Dumbbell Step-ups",sets:"4×12 each"},{name:"Jump Squats",sets:"4×15"},{name:"Romanian Deadlift",sets:"4×10"},{name:"Walking Lunges",sets:"4×12 each"},{name:"Weighted Calf Raises",sets:"4×25"}]}
+    ]}
+  },
+  bodyweight: {
+    beginner: { days:[
+      {day:"Day 1",focus:"Biceps & Forearms",exercises:[{name:"Wall Push-ups",sets:"3×12"},{name:"Inverted Rows",sets:"3×10"},{name:"Forearm Plank Hold",sets:"3×20s"},{name:"Towel Grip Hold",sets:"3×20s"}]},
+      {day:"Day 2",focus:"Shoulders",exercises:[{name:"Pike Push-ups",sets:"3×8"},{name:"Arm Circles",sets:"3×15"},{name:"Shoulder Shrugs",sets:"3×15"},{name:"Wall Handstand Hold",sets:"3×20s"}]},
+      {day:"Day 3",focus:"Abs & Core",exercises:[{name:"Crunches",sets:"3×12"},{name:"Russian Twists",sets:"3×12"},{name:"Plank",sets:"3×20s"},{name:"Mountain Climbers",sets:"3×20"}]},
+      {day:"Day 4",focus:"Chest",exercises:[{name:"Push-ups",sets:"3×10"},{name:"Wide Push-ups",sets:"3×10"},{name:"Incline Push-ups",sets:"3×10"},{name:"Chest Dips (chair)",sets:"3×8"}]},
+      {day:"Day 5",focus:"Back",exercises:[{name:"Superman Hold",sets:"3×20s"},{name:"Reverse Snow Angels",sets:"3×12"},{name:"Bird Dog",sets:"3×12 each"},{name:"Inverted Rows",sets:"3×10"}]},
+      {day:"Day 6",focus:"Legs",exercises:[{name:"Squats",sets:"3×12"},{name:"Lunges",sets:"3×10 each"},{name:"Step-ups",sets:"3×10 each"},{name:"Calf Raises",sets:"3×15"}]}
+    ]},
+    intermediate: { days:[
+      {day:"Day 1",focus:"Biceps & Forearms",exercises:[{name:"Chin-ups (assisted)",sets:"4×8"},{name:"Inverted Rows",sets:"4×12"},{name:"Forearm Plank Reach",sets:"4×20s"},{name:"Towel Grip Pulls",sets:"4×12"}]},
+      {day:"Day 2",focus:"Shoulders",exercises:[{name:"Pike Push-ups",sets:"4×10"},{name:"Wall Handstand Hold",sets:"4×30s"},{name:"Shoulder Taps",sets:"4×12"},{name:"Shrug Holds",sets:"4×15"}]},
+      {day:"Day 3",focus:"Abs & Core",exercises:[{name:"Hanging Knee Raises",sets:"4×12"},{name:"Russian Twists",sets:"4×15"},{name:"Side Plank",sets:"4×20s each"},{name:"Burpees",sets:"4×10"}]},
+      {day:"Day 4",focus:"Chest",exercises:[{name:"Push-ups",sets:"4×15"},{name:"Diamond Push-ups",sets:"4×10"},{name:"Decline Push-ups",sets:"4×12"},{name:"Dips (chair)",sets:"4×10"}]},
+      {day:"Day 5",focus:"Back",exercises:[{name:"Superman w/ Arm Lift",sets:"4×12"},{name:"Reverse Snow Angels",sets:"4×15"},{name:"Bird Dog",sets:"4×12 each"},{name:"Pull-ups (assisted)",sets:"4×8"}]},
+      {day:"Day 6",focus:"Legs",exercises:[{name:"Jump Squats",sets:"4×12"},{name:"Walking Lunges",sets:"4×12 each"},{name:"Step-ups",sets:"4×12 each"},{name:"Calf Raises",sets:"4×20"}]}
+    ]},
+    pro: { days:[
+      {day:"Day 1",focus:"Biceps & Forearms",exercises:[{name:"Pull-ups",sets:"4×10"},{name:"Chin-ups",sets:"4×10"},{name:"Inverted Rows (slow)",sets:"4×12"},{name:"Towel Grip Pull-ups",sets:"4×8"}]},
+      {day:"Day 2",focus:"Shoulders",exercises:[{name:"Handstand Push-ups",sets:"4×8"},{name:"Pike Push-ups (slow)",sets:"4×12"},{name:"Wall Walks",sets:"4×6"},{name:"Shrug Holds",sets:"4×20"}]},
+      {day:"Day 3",focus:"Abs & Core",exercises:[{name:"Hanging Leg Raises",sets:"4×12"},{name:"Russian Twists (slow)",sets:"4×20"},{name:"Side Plank w/ Hip Dips",sets:"4×12 each"},{name:"Burpees",sets:"4×15"}]},
+      {day:"Day 4",focus:"Chest",exercises:[{name:"Clap Push-ups",sets:"4×10"},{name:"Diamond Push-ups",sets:"4×12"},{name:"Decline Push-ups",sets:"4×12"},{name:"Dips (parallel bars)",sets:"4×12"}]},
+      {day:"Day 5",focus:"Back",exercises:[{name:"Pull-ups (weighted)",sets:"4×8"},{name:"Archer Pull-ups",sets:"4×8 each"},{name:"Superman w/ Arm+Leg",sets:"4×12"},{name:"Reverse Snow Angels",sets:"4×15"}]},
+      {day:"Day 6",focus:"Legs",exercises:[{name:"Pistol Squats",sets:"4×8 each"},{name:"Jump Lunges",sets:"4×12"},{name:"Bulgarian Split Squats",sets:"4×12 each"},{name:"Calf Raises (slow)",sets:"4×25"}]}
+    ]}
+  }
+};
+
+/* ══════════════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════════════ */
+let currentType  = "dumbbell";
+let currentLevel = "beginner";
+let muscleFilter = "all";
+let searchQuery  = "";
+
+const LEVEL_TEXT  = {beginner:"BEGINNER",intermediate:"INTERMEDIATE",pro:"PRO"};
+const LEVEL_CLASS = {beginner:"fb-beg",intermediate:"fb-int",pro:"fb-pro"};
+const INTENSITY_LABEL = {beginner:"Beginner",intermediate:"Intermediate",pro:"Pro"};
+
+/* ══════════════════════════════════════════════════
+   LOOKUP: get exercise data by name
+   ══════════════════════════════════════════════════ */
+function lookupEx(name) {
+  if (EXDB[name]) return withLocalImage(EXDB[name]);
+  // fuzzy: try partial match
+  const lower = name.toLowerCase();
+  for (const key of Object.keys(EXDB)) {
+    if (key.toLowerCase().includes(lower.split(" ")[0])) return withLocalImage(EXDB[key]);
+  }
+  return {
+    muscle:"Muscles", group:"core", icon:"💪",
+    desc:"A powerful exercise to build strength and conditioning.",
+    time:"15 min", kcal:"100 kcal", equip:"See instructions",
+    intensity:50,
+    img:DEFAULT_WORKOUT_IMAGE
+  };
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER
+   ══════════════════════════════════════════════════ */
+function render() {
+  const { days } = DATA[currentType][currentLevel];
+  const main = document.getElementById("woMain");
+  const typeLbl  = currentType === "dumbbell" ? "DUMBBELL" : "BODYWEIGHT";
+  const lvlClass = LEVEL_CLASS[currentLevel];
+  const lvlLbl   = LEVEL_TEXT[currentLevel];
+  const modeLbl  = `${typeLbl} · ${lvlLbl}`;
+  const intLbl   = INTENSITY_LABEL[currentLevel];
+
+  main.innerHTML = "";
+
+  days.forEach((day, di) => {
+    // Filter exercises by muscle
+    const filtered = day.exercises.filter(ex => {
+      const info = lookupEx(ex.name);
+      const muscleMatch = muscleFilter === "all" || info.group === muscleFilter;
+      const searchMatch = !searchQuery ||
+        ex.name.toLowerCase().includes(searchQuery) ||
+        (info.muscle||"").toLowerCase().includes(searchQuery) ||
+        (info.group||"").toLowerCase().includes(searchQuery);
+      return muscleMatch && searchMatch;
+    });
+
+    // Hide entire day block if no matching exercises
+    const block = document.createElement("div");
+    block.className = "day-block fade-in";
+    block.style.animationDelay = (di * 0.06) + "s";
+    if (filtered.length === 0) { block.classList.add("hidden"); }
+
+    // Day header
+    const hdr = document.createElement("div");
+    hdr.className = "day-header";
+    hdr.setAttribute("data-num", di + 1);
+    hdr.innerHTML = `
+      <div class="day-num-badge">${di+1}</div>
+      <div class="day-header-info">
+        <h3>${day.day}</h3>
+        <div class="dfocus">${day.focus}</div>
+      </div>
+      <span class="day-ex-count">${filtered.length} exercise${filtered.length!==1?"s":""}</span>
+    `;
+    block.appendChild(hdr);
+
+    // Flip card grid
+    const grid = document.createElement("div");
+    grid.className = "flip-grid";
+
+    filtered.forEach((ex, ei) => {
+      const info = lookupEx(ex.name);
+      const item = document.createElement("div");
+      item.className = "flip-item fade-in";
+      item.style.animationDelay = (di * 0.06 + ei * 0.05) + "s";
+      item.dataset.idx = `${di}-${ei}`;
+
+      const intPct = info.intensity;
+
+      item.innerHTML = `
+        <div class="flip-inner">
+
+          <!-- FRONT -->
+          <div class="flip-face flip-front">
+            <div class="ff-img">
+              <img class="ff-photo" src="${info.img}" alt="${ex.name}" loading="lazy"
+                   onerror="this.style.display='none'">
+              <div class="ff-overlay"></div>
+              <div class="ff-badges">
+                <span class="fbadge fb-type">${typeLbl}</span>
+                <span class="fbadge ${lvlClass}">${lvlLbl}</span>
+              </div>
+              <div class="ff-hint" title="Click to flip">⟳</div>
+              <div class="ff-emoji">${info.icon}</div>
+            </div>
+            <div class="ff-body">
+              <div class="ff-name">${ex.name}</div>
+              <div class="ff-muscle">🎯 ${info.muscle}</div>
+              <p class="ff-desc">${info.desc}</p>
+              <div class="ff-stats">
+                <div class="ff-stat"><span class="sv">⏱ ${info.time}</span><span class="sk">Duration</span></div>
+                <div class="ff-stat"><span class="sv">🔥 ${info.kcal}</span><span class="sk">Calories</span></div>
+                <div class="ff-stat"><span class="sv">💪 ${ex.sets}</span><span class="sk">Sets×Reps</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BACK -->
+          <div class="flip-face flip-back">
+            <div class="fb-head">
+              <img src="${info.img}" alt="${ex.name}" class="fb-head-img" loading="lazy">
+              <div class="fb-head-overlay"></div>
+              <div class="fb-head-content">
+                <span class="fb-head-emoji">${info.icon}</span>
+                <div class="fb-head-text">
+                  <strong>${ex.name}</strong>
+                  <span>🎯 ${info.muscle}</span>
+                </div>
+                <button class="fb-close-btn" onclick="closeFlip(event,'${di}-${ei}')">✕</button>
+              </div>
+            </div>
+            <div class="fb-body">
+              <div class="fb-row"><span class="ri">⏱</span><span class="rl">Duration</span><span class="rv">${info.time}</span></div>
+              <div class="fb-row"><span class="ri">🔥</span><span class="rl">Calories</span><span class="rv">${info.kcal}</span></div>
+              <div class="fb-row"><span class="ri">💪</span><span class="rl">Sets × Reps</span><span class="rv">${ex.sets}</span></div>
+              <div class="fb-row"><span class="ri">🔧</span><span class="rl">Equipment</span><span class="rv">${info.equip}</span></div>
+              <div class="fb-row"><span class="ri">🏷</span><span class="rl">Mode</span><span class="rv">${modeLbl}</span></div>
+              <div class="fb-intensity">
+                <div class="fb-int-head">
+                  <span>Intensity Level</span>
+                  <span>${intPct}% — ${intLbl}</span>
+                </div>
+                <div class="fb-int-track">
+                  <div class="fb-int-fill" style="width:${intPct}%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      `;
+
+      // Click to flip
+      item.addEventListener("click", (e) => {
+        if (e.target.closest(".fb-close-btn")) return;
+        item.classList.toggle("flipped");
+      });
+
+      grid.appendChild(item);
+    });
+
+    block.appendChild(grid);
+
+    // Empty state if no exercises after filter
+    if (filtered.length === 0) {
+      block.classList.add("hidden");
+    }
+
+    main.appendChild(block);
+  });
+
+  // Check if everything is hidden
+  const allHidden = [...main.querySelectorAll(".day-block")].every(b => b.classList.contains("hidden"));
+  if (allHidden) {
+    main.innerHTML = `<div class="wo-empty"><div class="ei">🔍</div><p>No exercises found. Try adjusting your filters.</p></div>`;
+  }
+}
+
+function closeFlip(e, idx) {
+  e.stopPropagation();
+  const item = document.querySelector(`.flip-item[data-idx="${idx}"]`);
+  if (item) item.classList.remove("flipped");
+}
+
+/* ══════════════════════════════════════════════════
+   EVENT LISTENERS
+   ══════════════════════════════════════════════════ */
+document.querySelectorAll(".type-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".type-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentType = btn.dataset.type;
+    render();
+  });
+});
+
+document.querySelectorAll(".level-pill").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".level-pill").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentLevel = btn.dataset.level;
+    render();
+  });
+});
+
+document.querySelectorAll(".muscle-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".muscle-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    muscleFilter = btn.dataset.muscle;
+    render();
+  });
+});
+
+document.getElementById("searchInput").addEventListener("input", e => {
+  searchQuery = e.target.value.toLowerCase().trim();
+  render();
+});
+
+render();
+</script>
+{% endblock %}

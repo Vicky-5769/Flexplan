@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}FlexPlan – Forge Your Perfect Body{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {% block navbar %}
+  <nav class="navbar">
+    <a href="/" class="nav-logo">
+      <div class="nav-logo-icon">🏋️</div>
+      <span class="nav-logo-text">FlexPlan</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/workouts">Workouts</a></li>
+      <li><a href="/diet">Diet Plans</a></li>
+      <li><a href="/progress">Progress</a></li>
+      <li><a href="/bmi">BMI Calculator</a></li>
+      <li><a href="/workouts" class="nav-cta">🔥 Start Training</a></li>
+    </ul>
+    <div class="nav-auth" id="nav-auth"></div>
+  </nav>
+  {% endblock %}
+
+  {% block content %}{% endblock %}
+
+  {% block footer %}
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="/" class="nav-logo">
+          <div class="nav-logo-icon" style="width:32px;height:32px;font-size:1rem">🏋️</div>
+          <span class="nav-logo-text" style="font-size:1.4rem">FlexPlan</span>
+        </a>
+        <p>Your ultimate fitness companion. Build strength, eat right, and track your progress toward a healthier you.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Training</h4>
+        <a href="/workouts">All Workouts</a>
+        <a href="/workouts">Beginner Guide</a>
+        <a href="/workouts">Advanced Training</a>
+      </div>
+      <div class="footer-col">
+        <h4>Nutrition</h4>
+        <a href="/diet">Diet Plans</a>
+        <a href="/diet">South Indian Diet</a>
+        <a href="/bmi">BMI Calculator</a>
+      </div>
+      <div class="footer-col">
+        <h4>Track</h4>
+        <a href="/progress">My Progress</a>
+        <a href="/bmi">Health Metrics</a>
+        <a href="/login">Login</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 FlexPlan. Built for Final Year Project. 100% Free.</p>
+    </div>
+  </footer>
+  {% endblock %}
+
+  <script src="/static/js/main.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
